@@ -14,6 +14,8 @@ import DemandBoard from '@/components/DemandBoard'
 import RFQMatches from '@/components/RFQMatches'
 import AggregationNetwork from '@/components/AggregationNetwork'
 import WhatsAppIntel from '@/components/WhatsAppIntel'
+import WhatsAppSimulator from '@/components/WhatsAppSimulator'
+import AIAnalyst from '@/components/AIAnalyst'
 import { CropProvider } from '@/context/CropContext'
 import { NavProvider, useNav } from '@/context/NavContext'
 import { RFQS } from '@/lib/dummy'
@@ -31,63 +33,67 @@ function AppContent() {
   const showViewSwitcher = activeNav === 'harvest-intel'
 
   return (
-    <div>
-      <Navbar />
-      <div className="pt-[72px]">
-        {showViewSwitcher && (
-          <ViewSwitcher
-            activeView={activeView}
-            onViewChange={setActiveView}
-            regionFilter={regionFilter}
-            onRegionChange={setRegionFilter}
-            cropFilter={cropFilter}
-            onCropChange={setCropFilter}
-          />
-        )}
-
-        <div className="max-w-screen-xl mx-auto px-4 py-4">
-
-          {/* Harvest Intel */}
-          {activeNav === 'harvest-intel' && activeView === 'aggregator' && (
-            <AggregatorView regionFilter={regionFilter} cropFilter={cropFilter} />
-          )}
-          {activeNav === 'harvest-intel' && activeView === 'farmer' && <SupplierView />}
-
-          {/* On Trends */}
-          {activeNav === 'on-trends' && (
-            <div>
-              <SectionTitle>Live market prices</SectionTitle>
-              <PriceTrends />
-              <SectionTitle>Price & volume analytics</SectionTitle>
-              <TrendCharts />
-              <SectionTitle>Global supply outlook</SectionTitle>
-              <GlobalTrends />
-            </div>
+    <>
+      <main>
+        <Navbar />
+        <div className="pt-[72px]">
+          {showViewSwitcher && (
+            <ViewSwitcher
+              activeView={activeView}
+              onViewChange={setActiveView}
+              regionFilter={regionFilter}
+              onRegionChange={setRegionFilter}
+              cropFilter={cropFilter}
+              onCropChange={setCropFilter}
+            />
           )}
 
-          {/* On Demand */}
-          {activeNav === 'on-demand' && (
-            <div>
-              <SectionTitle>Active buyer RFQs</SectionTitle>
-              <DemandBoard />
-              <SectionTitle>Supply matches</SectionTitle>
-              <RFQMatches rfqs={RFQS} />
-              <SectionTitle>WhatsApp & SMS pre-harvest</SectionTitle>
-              <WhatsAppIntel />
-            </div>
-          )}
+          <div className="max-w-screen-xl mx-auto px-4 py-4">
 
-          {/* Warehouses */}
-          {activeNav === 'warehouses' && (
-            <div>
-              <SectionTitle>Aggregation point network</SectionTitle>
-              <AggregationNetwork />
-            </div>
-          )}
+            {/* Harvest Intel */}
+            {activeNav === 'harvest-intel' && activeView === 'aggregator' && (
+              <AggregatorView regionFilter={regionFilter} cropFilter={cropFilter} />
+            )}
+            {activeNav === 'harvest-intel' && activeView === 'farmer' && <SupplierView />}
 
+            {/* On Trends */}
+            {activeNav === 'on-trends' && (
+              <div>
+                <SectionTitle>Live market prices</SectionTitle>
+                <PriceTrends />
+                <SectionTitle>Price & volume analytics</SectionTitle>
+                <TrendCharts />
+                <SectionTitle>Global supply outlook</SectionTitle>
+                <GlobalTrends />
+              </div>
+            )}
+
+            {/* On Demand */}
+            {activeNav === 'on-demand' && (
+              <div>
+                <SectionTitle>Active buyer RFQs</SectionTitle>
+                <DemandBoard />
+                <SectionTitle>Supply matches</SectionTitle>
+                <RFQMatches rfqs={RFQS} />
+                <SectionTitle>WhatsApp & SMS pre-harvest</SectionTitle>
+                <WhatsAppSimulator />
+                <WhatsAppIntel />
+              </div>
+            )}
+
+            {/* Warehouses */}
+            {activeNav === 'warehouses' && (
+              <div>
+                <SectionTitle>Aggregation point network</SectionTitle>
+                <AggregationNetwork />
+              </div>
+            )}
+
+          </div>
         </div>
-      </div>
-    </div>
+      </main>
+      <AIAnalyst />
+    </>
   )
 }
 

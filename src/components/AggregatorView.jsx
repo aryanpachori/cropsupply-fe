@@ -13,6 +13,7 @@ import AggregationNetwork from './AggregationNetwork'
 import ValueChainPlayers from './ValueChainPlayers'
 import GlobalTrends from './GlobalTrends'
 import WhatsAppIntel from './WhatsAppIntel'
+import WhatsAppSimulator from './WhatsAppSimulator'
 import FarmerTable from './FarmerTable'
 import AIMatchingPanel from './AIMatchingPanel'
 import TrendCharts from './TrendCharts'
@@ -89,6 +90,7 @@ export default function AggregatorView({ regionFilter, cropFilter }) {
       <GlobalTrends />
 
       <SectionTitle>WhatsApp & SMS channel</SectionTitle>
+      <WhatsAppSimulator />
       <WhatsAppIntel />
 
       <SectionTitle>Farmer-level data</SectionTitle>

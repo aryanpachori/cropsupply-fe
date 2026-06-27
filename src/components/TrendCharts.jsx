@@ -232,19 +232,18 @@ export default function TrendCharts() {
       <div className="bg-white rounded-2xl border border-gray-100 p-5 mb-6">
         <ResponsiveContainer width="100%" height={240}>
           <BarChart
-            data={HARVEST_TIMELINE}
+            data={HARVEST_TIMELINE.map(e => ({ ...e, label: `${CROP_EMOJI[e.crop] || '🌱'} ${e.crop} · ${e.region}` }))}
             layout="vertical"
-            margin={{ top: 0, right: 20, left: 0, bottom: 20 }}
+            margin={{ top: 0, right: 20, left: 0, bottom: 24 }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="#F1EFE8" horizontal={false} />
             <YAxis
-              dataKey="region"
+              dataKey="label"
               type="category"
-              width={130}
+              width={145}
               tick={{ fontSize: 10, fill: '#888780' }}
               axisLine={false}
               tickLine={false}
-              tickFormatter={(val, i) => `${CROP_EMOJI[HARVEST_TIMELINE[i]?.crop] || '🌱'} ${HARVEST_TIMELINE[i]?.crop} · ${val}`}
             />
             <XAxis
               type="number"
