@@ -2,14 +2,7 @@
 
 import Badge from './ui/Badge'
 import { CROP_EMOJI } from '@/styles/tokens'
-
-const PRE_HARVEST = [
-  { farmer: "MZ-10042", crop: "Maize", region: "Mwanza", qty_t: 3, eta_days: 14, status: "verified", channel: "WhatsApp" },
-  { farmer: "MZ-11204", crop: "Rice", region: "Morogoro", qty_t: 1.5, eta_days: 18, status: "pending_verify", channel: "SMS" },
-  { farmer: "MZ-10831", crop: "Maize", region: "Morogoro", qty_t: 2.1, eta_days: 22, status: "verified", channel: "WhatsApp" },
-  { farmer: "MZ-12001", crop: "Onion", region: "Arusha", qty_t: 0.8, eta_days: 9, status: "flagged", channel: "SMS" },
-  { farmer: "MZ-11509", crop: "Rice", region: "Mbeya", qty_t: 4.2, eta_days: 16, status: "verified", channel: "WhatsApp" },
-]
+import { PRE_HARVEST } from '@/lib/dummy'
 
 const STEPS = ["1. Farmer messages", "2. NLP extracts intent", "3. Agent verifies if needed", "4. Added to forecast"]
 

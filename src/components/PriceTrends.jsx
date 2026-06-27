@@ -4,22 +4,12 @@ import { useState } from 'react'
 import Card from './ui/Card'
 import Badge from './ui/Badge'
 import { CROP_EMOJI } from '@/styles/tokens'
-
-const LIVE_PRICES = [
-  { crop: "Onion", market: "Kariakoo", region: "Dar es Salaam", qty: "200T", price: 810000, unit: "T", currency: "TZS", grade: "A", season: "In Season", change_24h: -5.2 },
-  { crop: "Watermelon", market: "Kariakoo", region: "Dar es Salaam", qty: "97 pcs", price: 500, unit: "pc", currency: "TZS", grade: "Mixed", season: "In Season", change_24h: 2.3 },
-  { crop: "Avocado", market: "Buguruni", region: "Dar es Salaam", qty: "5000T", price: 10000, unit: "T", currency: "TZS", grade: "A", season: "In Season", change_24h: 0 },
-  { crop: "Chinese cabbage", market: "Buguruni", region: "Dar es Salaam", qty: "100kg", price: 30000, unit: "100kg", currency: "TZS", grade: "B", season: "In Season", change_24h: 8.4 },
-  { crop: "Rice", market: "Magomeni", region: "Dar es Salaam", qty: "200kg", price: 2500, unit: "kg", currency: "TZS", grade: "A", season: "In Season", change_24h: -3.1 },
-  { crop: "Chickpeas", market: "Kisutu", region: "Dar es Salaam", qty: "500kg", price: 1200, unit: "kg", currency: "TZS", grade: "A", season: "In Season", change_24h: -5.1 },
-  { crop: "Maize", market: "Tandale", region: "Dar es Salaam", qty: "20T", price: 60000, unit: "T", currency: "TZS", grade: "A", season: "In Season", change_24h: 0 },
-  { crop: "Maize", market: "Toangoma", region: "Dar es Salaam", qty: "200 pcs", price: 258, unit: "pc", currency: "TZS", grade: "B", season: "In Season", change_24h: 2.1 },
-]
+import { LIVE_PRICES } from '@/lib/dummy'
 
 const CATEGORIES = ['All', 'Vegetables', 'Fruits', 'Grains', 'Legumes']
 
 const CATEGORY_MAP = {
-  Vegetables: ['Onion', 'Chinese cabbage', 'Sweet Pepper'],
+  Vegetables: ['Onion', 'Chinese cabbage', 'Sweet Pepper', 'Tomato', 'Potato'],
   Fruits: ['Watermelon', 'Avocado'],
   Grains: ['Maize', 'Rice'],
   Legumes: ['Chickpeas', 'Groundnuts'],

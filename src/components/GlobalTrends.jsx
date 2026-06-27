@@ -3,14 +3,7 @@
 import Card from './ui/Card'
 import StatDelta from './ui/StatDelta'
 import { CROP_EMOJI } from '@/styles/tokens'
-
-const GLOBAL_CROPS = [
-  { crop: "Maize", top_regions: ["Dodoma TZ", "Mwanza TZ", "Nairobi KE"], global_volume_kt: 48200, season_status: "peak", yoy_change: 8.2 },
-  { crop: "Rice", top_regions: ["Morogoro TZ", "Mbeya TZ", "Kampala UG"], global_volume_kt: 31400, season_status: "rising", yoy_change: 3.1 },
-  { crop: "Onion", top_regions: ["Arusha TZ", "Singida TZ", "Nairobi KE"], global_volume_kt: 12800, season_status: "low", yoy_change: -18.4 },
-  { crop: "Avocado", top_regions: ["Kilimanjaro TZ", "Mbeya TZ", "Accra GH"], global_volume_kt: 8900, season_status: "peak", yoy_change: 51.2 },
-  { crop: "Groundnuts", top_regions: ["Mwanza TZ", "Dodoma TZ", "Lagos NG"], global_volume_kt: 6200, season_status: "low", yoy_change: -12.1 },
-]
+import { GLOBAL_CROPS } from '@/lib/dummy'
 
 const SEASON_CONFIG = {
   peak: { label: "Peak season", color: "#1D9E75", bg: "#E1F5EE" },

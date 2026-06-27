@@ -4,35 +4,7 @@ import { useState } from 'react'
 import Card from './ui/Card'
 import ProgressBar from './ui/ProgressBar'
 import { CROP_EMOJI } from '@/styles/tokens'
-
-const NETWORK_DATA = {
-  village_warehouses: [
-    { name: "Ilemela Village Store", region: "Mwanza", capacity_t: 50, stock_t: 22, crops: ["Maize", "Groundnuts"] },
-    { name: "Kilosa Village Hub", region: "Morogoro", capacity_t: 80, stock_t: 41, crops: ["Rice", "Maize"] },
-    { name: "Monduli Collection Point", region: "Arusha", capacity_t: 40, stock_t: 8, crops: ["Onion"] },
-  ],
-  local_markets: [
-    { name: "Kariakoo Market", region: "Dar es Salaam", capacity_t: 500, stock_t: 210, crops: ["Onion","Rice","Maize","Vegetables"] },
-    { name: "Tandale Market", region: "Dar es Salaam", capacity_t: 300, stock_t: 140, crops: ["Maize","Groundnuts"] },
-    { name: "Arusha Central Market", region: "Arusha", capacity_t: 400, stock_t: 180, crops: ["Onion","Avocado"] },
-  ],
-  grain_storage: [
-    { name: "Dodoma Grain Store", region: "Dodoma", capacity_t: 2000, stock_t: 340, crops: ["Maize","Rice"] },
-    { name: "Mwanza Grain Hub", region: "Mwanza", capacity_t: 1500, stock_t: 420, crops: ["Maize","Rice","Groundnuts"] },
-  ],
-  cold_storage: [
-    { name: "Arusha Cold Storage", region: "Arusha", capacity_t: 800, stock_t: 90, crops: ["Avocado","Sweet Pepper","Vegetables"] },
-    { name: "DSM Cold Hub", region: "Dar es Salaam", capacity_t: 1200, stock_t: 380, crops: ["Avocado","Onion"] },
-  ],
-  port_warehouses: [
-    { name: "DSM Port Warehouse A", region: "Dar es Salaam", capacity_t: 5000, stock_t: 1200, crops: ["Rice","Maize","Legumes"] },
-    { name: "DSM Port Warehouse B", region: "Dar es Salaam", capacity_t: 3000, stock_t: 890, crops: ["Avocado","Coffee","Tea"] },
-  ],
-  fulfillment_centers: [
-    { name: "Mbeya Fulfillment Ctr", region: "Mbeya", capacity_t: 1500, stock_t: 380, crops: ["Rice","Maize"] },
-    { name: "Morogoro FC", region: "Morogoro", capacity_t: 1000, stock_t: 210, crops: ["Rice","Maize"] },
-  ]
-}
+import { NETWORK_DATA } from '@/lib/dummy'
 
 const TIER_CONFIG = [
   { key: "village_warehouses", label: "Village warehouses", color: "#1D9E75", icon: "🏘" },

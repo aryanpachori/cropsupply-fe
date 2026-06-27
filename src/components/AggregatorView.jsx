@@ -18,6 +18,9 @@ import AIMatchingPanel from './AIMatchingPanel'
 import TrendCharts from './TrendCharts'
 import InsightSummaryBar from './InsightSummaryBar'
 import CropDetailDrawer from './CropDetailDrawer'
+import TransportPanel from './TransportPanel'
+import SupplierDirectory from './SupplierDirectory'
+import DataQualityBanner from './DataQualityBanner'
 import { useCrop } from '@/context/CropContext'
 import { KPIS, FORECAST, FARMERS, TRENDS, HEATMAP, RFQS } from '@/lib/dummy'
 
@@ -72,8 +75,14 @@ export default function AggregatorView({ regionFilter, cropFilter }) {
       <DemandBoard />
       <RFQMatches rfqs={RFQS} />
 
+      <SectionTitle>Verified suppliers</SectionTitle>
+      <SupplierDirectory />
+
       <SectionTitle>Supply network</SectionTitle>
       <AggregationNetwork />
+
+      <SectionTitle>Logistics</SectionTitle>
+      <TransportPanel />
 
       <SectionTitle>Intelligence for every player</SectionTitle>
       <ValueChainPlayers />
@@ -104,6 +113,8 @@ export default function AggregatorView({ regionFilter, cropFilter }) {
           ↑
         </button>
       )}
+
+      <DataQualityBanner />
 
       {activeCrop && (
         <CropDetailDrawer crop={activeCrop} onClose={() => setActiveCrop(null)} />

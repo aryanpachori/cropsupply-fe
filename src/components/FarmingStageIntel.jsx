@@ -3,28 +3,8 @@
 import { useState } from 'react'
 import ProgressBar from './ui/ProgressBar'
 import { CROP_EMOJI } from '@/styles/tokens'
-
-const STAGE_VOLUME = [
-  { stage: 1, name: "Field inspection", crops: [{ crop: "Maize", tonnes: 12000, regions: ["Tabora","Kigoma","Rukwa"] }, { crop: "Rice", tonnes: 8400, regions: ["Kagera","Iringa"] }], action: "contract_farming" },
-  { stage: 2, name: "Soil testing", crops: [{ crop: "Carrot", tonnes: 70000, regions: ["Arusha","Kilimanjaro"] }, { crop: "Maize", tonnes: 31000, regions: ["Singida","Shinyanga"] }], action: "contract_farming" },
-  { stage: 3, name: "Farm clearing", crops: [{ crop: "Maize", tonnes: 45000, regions: ["Dodoma","Tabora","Mwanza"] }, { crop: "Groundnuts", tonnes: 18000, regions: ["Mwanza","Shinyanga"] }], action: "contract_farming" },
-  { stage: 4, name: "Improving soil fertility", crops: [{ crop: "Rice", tonnes: 22000, regions: ["Morogoro","Mbeya"] }, { crop: "Onion", tonnes: 9800, regions: ["Arusha","Singida"] }], action: "contract_farming" },
-  { stage: 5, name: "Main field prep", crops: [{ crop: "Maize", tonnes: 38000, regions: ["Dodoma","Mwanza"] }, { crop: "Sweet Pepper", tonnes: 4200, regions: ["Kilimanjaro","Arusha"] }], action: "contract_farming" },
-  { stage: 6, name: "Harrowing", crops: [{ crop: "Cabbage", tonnes: 400, regions: ["Arusha","Kilimanjaro"] }, { crop: "Maize", tonnes: 28000, regions: ["Dodoma","Kagera"] }], action: "contract_farming" },
-  { stage: 7, name: "Water harvesting structures", crops: [{ crop: "Rice", tonnes: 15000, regions: ["Mbeya","Morogoro"] }, { crop: "Maize", tonnes: 19000, regions: ["Mwanza","Tabora"] }], action: "contract_farming" },
-  { stage: 8, name: "Making ridges", crops: [{ crop: "Onion", tonnes: 11000, regions: ["Arusha","Singida"] }, { crop: "Potato", tonnes: 8800, regions: ["Mbeya","Iringa"] }], action: "contract_farming" },
-  { stage: 9, name: "Irrigation system", crops: [{ crop: "Rice", tonnes: 18000, regions: ["Morogoro","Mbeya","Kagera"] }, { crop: "Maize", tonnes: 24000, regions: ["Dodoma","Mwanza"] }], action: "contract_farming" },
-  { stage: 10, name: "Sowing seeds", crops: [{ crop: "Maize", tonnes: 300000, regions: ["Dodoma","Mwanza","Arusha","Tabora"] }, { crop: "Rice", tonnes: 180000, regions: ["Morogoro","Mbeya","Kagera"] }], action: "book_supply" },
-  { stage: 11, name: "Irrigation", crops: [{ crop: "Maize", tonnes: 95000, regions: ["Dodoma","Mwanza"] }, { crop: "Onion", tonnes: 42000, regions: ["Arusha","Singida"] }], action: "book_supply" },
-  { stage: 12, name: "Weed control", crops: [{ crop: "Maize", tonnes: 68000, regions: ["Dodoma","Mwanza","Morogoro"] }, { crop: "Rice", tonnes: 44000, regions: ["Mbeya","Morogoro"] }], action: "book_supply" },
-  { stage: 13, name: "Fertilizer application", crops: [{ crop: "Maize", tonnes: 52000, regions: ["Dodoma","Mwanza"] }, { crop: "Rice", tonnes: 31000, regions: ["Morogoro","Mbeya"] }], action: "book_supply" },
-  { stage: 14, name: "Pest control", crops: [{ crop: "Maize", tonnes: 38000, regions: ["Dodoma","Mwanza","Arusha"] }, { crop: "Rice", tonnes: 22000, regions: ["Morogoro","Mbeya"] }], action: "book_supply" },
-  { stage: 15, name: "Other techniques", crops: [{ crop: "Maize", tonnes: 28000, regions: ["Dodoma","Mwanza"] }, { crop: "Rice", tonnes: 18000, regions: ["Morogoro"] }], action: "book_supply" },
-  { stage: 16, name: "Harvest preparation", crops: [{ crop: "Maize", tonnes: 14000, regions: ["Dodoma","Mwanza"] }, { crop: "Rice", tonnes: 9000, regions: ["Morogoro","Mbeya"] }, { crop: "Onion", tonnes: 5200, regions: ["Arusha"] }], action: "book_supply" },
-  { stage: 17, name: "Harvesting", crops: [{ crop: "Rice", tonnes: 900, regions: ["Morogoro"] }, { crop: "Onion", tonnes: 520, regions: ["Arusha"] }], action: "book_supply" },
-  { stage: 18, name: "Post-harvest handling", crops: [{ crop: "Rice", tonnes: 420, regions: ["Morogoro"] }], action: "book_supply" },
-  { stage: 19, name: "Crop storage", crops: [{ crop: "Maize", tonnes: 280, regions: ["Dodoma"] }, { crop: "Rice", tonnes: 190, regions: ["Mbeya"] }], action: "book_supply" },
-]
+import { STAGE_VOLUME } from '@/lib/dummy'
+import ContractFarmingForm from './ContractFarmingForm'
 
 function formatTonnes(t) {
   if (t >= 1000000) return (t / 1000000).toFixed(1) + 'M T'
@@ -82,9 +62,19 @@ function StageTimeline({ activeStage }) {
 function DetailView({ stage, onBack }) {
   const totalTonnes = stage.crops.reduce((s, c) => s + c.tonnes, 0)
   const isContract = stage.action === 'contract_farming'
+  const [formCrop, setFormCrop] = useState(null)
 
   return (
     <div>
+      {formCrop && (
+        <ContractFarmingForm
+          stage={stage.stage}
+          stageName={stage.name}
+          crop={formCrop.crop}
+          region={formCrop.regions[0]}
+          onClose={() => setFormCrop(null)}
+        />
+      )}
       <button
         onClick={onBack}
         className="flex items-center gap-1 text-[11px] text-gray-500 cursor-pointer mb-4 hover:text-gray-800"
@@ -138,6 +128,7 @@ function DetailView({ stage, onBack }) {
               />
             </div>
             <button
+              onClick={() => isContract && setFormCrop(c)}
               className="mt-3 w-full text-xs font-medium py-2 rounded-xl text-white transition-opacity hover:opacity-90"
               style={{ background: isContract ? '#185FA5' : '#0F6E56' }}
             >

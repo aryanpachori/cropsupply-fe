@@ -1,10 +1,8 @@
 'use client'
 
-const TOP_INSIGHTS = [
-  { id: 1, icon: "📉", title: "Maize price likely to drop 8–12% by late July", severity: "high" },
-  { id: 2, icon: "📈", title: "Onion prices set to spike — supply down 31%", severity: "high" },
-  { id: 4, icon: "🤝", title: "RFQ-001 can be fulfilled — 3 farmers matched", severity: "urgent" },
-]
+import { AI_INSIGHTS } from '@/lib/dummy'
+
+const TOP_INSIGHTS = AI_INSIGHTS.slice(0, 3).map(i => ({ id: i.id, icon: i.icon, title: i.title, severity: i.severity }))
 
 function severityDotColor(severity) {
   if (severity === 'high' || severity === 'urgent') return '#F09595'

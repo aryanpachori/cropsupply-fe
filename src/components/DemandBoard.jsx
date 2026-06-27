@@ -1,15 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { RFQS } from '@/lib/dummy'
+import { RFQS, DEMAND_DATA } from '@/lib/dummy'
 import { CROP_EMOJI } from '@/styles/tokens'
-
-const DEMAND_DATA = [
-  { id: "RFQ-001", crop: "Maize", buyer: "Arusha Central Market", location: "Arusha, Tanzania", qty_kg: 400, price_per_unit: 2300, currency: "USD", grade: "A", needed_by: "2026-07-08", frequency: "one-time", status: "urgent", days_left: 11 },
-  { id: "RFQ-002", crop: "Rice", buyer: "Union Square Greenmarket", location: "New York, USA", qty_kg: 2300000, price_per_unit: 2300, currency: "EUR", grade: "Mixed", needed_by: "2026-07-05", frequency: "monthly", status: "urgent", days_left: 8 },
-  { id: "RFQ-003", crop: "Sweet Pepper", buyer: "Kariakoo Market", location: "Dar es Salaam", qty_kg: 4000, price_per_unit: 11000, currency: "TZS", grade: "Hass Export", needed_by: "2026-07-18", frequency: "weekly", status: "active", days_left: 21 },
-  { id: "RFQ-004", crop: "Maize", buyer: "Buyuni Market", location: "Dar es Salaam", qty_kg: 1000, price_per_unit: 500, currency: "TZS", grade: "B", needed_by: "2026-07-25", frequency: "seasonal", status: "active", days_left: 28 },
-]
 
 const STATUS_TABS = ['All', 'Urgent', 'Active', 'Expiring soon']
 
