@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import KPIBar from './KPIBar'
+import FarmingStageIntel from './FarmingStageIntel'
 import CountdownCards from './CountdownCards'
 import SupplyTrend from './SupplyTrend'
 import ReadinessHeatmap from './ReadinessHeatmap'
@@ -16,7 +17,6 @@ import FarmerTable from './FarmerTable'
 import AIMatchingPanel from './AIMatchingPanel'
 import TrendCharts from './TrendCharts'
 import InsightSummaryBar from './InsightSummaryBar'
-import AnalyticsSummary from './AnalyticsSummary'
 import CropDetailDrawer from './CropDetailDrawer'
 import { useCrop } from '@/context/CropContext'
 import { KPIS, FORECAST, FARMERS, TRENDS, HEATMAP, RFQS } from '@/lib/dummy'
@@ -53,7 +53,7 @@ export default function AggregatorView({ regionFilter, cropFilter }) {
   return (
     <div>
       <InsightSummaryBar onInsightClick={handleInsightClick} />
-      <AnalyticsSummary />
+      <FarmingStageIntel />
       <KPIBar kpis={KPIS} />
       <Divider />
       <CountdownCards forecast={filteredForecast} />

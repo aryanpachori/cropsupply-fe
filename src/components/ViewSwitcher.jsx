@@ -36,7 +36,7 @@ export default function ViewSwitcher({ activeView, onViewChange, regionFilter, o
               onChange={e => onRegionChange(e.target.value)}
               className="text-[11px] border border-gray-200 rounded-lg px-3 py-1.5 bg-white text-gray-700 focus:outline-none focus:border-[#1D9E75] transition-colors appearance-none pr-6"
             >
-              <option value="">All regions</option>
+              <option value="">All locations</option>
               {regions.map(r => <option key={r} value={r}>{r}</option>)}
             </select>
             <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-[10px]">▾</span>

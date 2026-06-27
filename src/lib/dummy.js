@@ -8,15 +8,18 @@ export const KPIS = {
   soil_samples: 205000
 }
 
+// location field = "District, Region" format
+// will expand to "Ward, District, Region" as platform grows to village level
+// Geophrey confirmed: going more granular over time
 export const FORECAST = [
-  { region: "Dodoma", crop: "Maize", total_tonnes: 1400, farmer_count: 312, avg_step: 15, days_to_harvest: 13, harvest_from: "2026-07-10", harvest_to: "2026-07-20", confidence: "high" },
-  { region: "Mwanza", crop: "Maize", total_tonnes: 1200, farmer_count: 284, avg_step: 14, days_to_harvest: 15, harvest_from: "2026-07-12", harvest_to: "2026-07-22", confidence: "high" },
-  { region: "Morogoro", crop: "Rice", total_tonnes: 900, farmer_count: 198, avg_step: 16, days_to_harvest: 11, harvest_from: "2026-07-08", harvest_to: "2026-07-18", confidence: "high" },
-  { region: "Arusha", crop: "Maize", total_tonnes: 900, farmer_count: 156, avg_step: 14, days_to_harvest: 18, harvest_from: "2026-07-15", harvest_to: "2026-07-25", confidence: "high" },
-  { region: "Mbeya", crop: "Rice", total_tonnes: 600, farmer_count: 167, avg_step: 15, days_to_harvest: 18, harvest_from: "2026-07-05", harvest_to: "2026-07-15", confidence: "high" },
-  { region: "Arusha", crop: "Onion", total_tonnes: 520, farmer_count: 143, avg_step: 11, days_to_harvest: 9, harvest_from: "2026-07-06", harvest_to: "2026-07-16", confidence: "medium" },
-  { region: "Mwanza", crop: "Rice", total_tonnes: 400, farmer_count: 122, avg_step: 15, days_to_harvest: 31, harvest_from: "2026-07-18", harvest_to: "2026-07-28", confidence: "high" },
-  { region: "Mwanza", crop: "Groundnuts", total_tonnes: 310, farmer_count: 88, avg_step: 7, days_to_harvest: 33, harvest_from: "2026-07-20", harvest_to: "2026-07-30", confidence: "low" }
+  { region: "Dodoma", district: "Dodoma MC", location: "Dodoma MC, Dodoma", crop: "Maize", total_tonnes: 1400, farmer_count: 312, avg_step: 15, days_to_harvest: 13, harvest_from: "2026-07-10", harvest_to: "2026-07-20", confidence: "high" },
+  { region: "Mwanza", district: "Ilemela", location: "Ilemela, Mwanza", crop: "Maize", total_tonnes: 1200, farmer_count: 284, avg_step: 14, days_to_harvest: 15, harvest_from: "2026-07-12", harvest_to: "2026-07-22", confidence: "high" },
+  { region: "Morogoro", district: "Morogoro MC", location: "Morogoro MC, Morogoro", crop: "Rice", total_tonnes: 900, farmer_count: 198, avg_step: 16, days_to_harvest: 11, harvest_from: "2026-07-08", harvest_to: "2026-07-18", confidence: "high" },
+  { region: "Arusha", district: "Arusha CC", location: "Arusha CC, Arusha", crop: "Onion", total_tonnes: 520, farmer_count: 143, avg_step: 11, days_to_harvest: 9, harvest_from: "2026-07-06", harvest_to: "2026-07-16", confidence: "medium" },
+  { region: "Mbeya", district: "Mbeya CC", location: "Mbeya CC, Mbeya", crop: "Rice", total_tonnes: 600, farmer_count: 167, avg_step: 15, days_to_harvest: 18, harvest_from: "2026-07-05", harvest_to: "2026-07-15", confidence: "high" },
+  { region: "Arusha", district: "Meru", location: "Meru, Arusha", crop: "Maize", total_tonnes: 900, farmer_count: 156, avg_step: 14, days_to_harvest: 18, harvest_from: "2026-07-15", harvest_to: "2026-07-25", confidence: "high" },
+  { region: "Mwanza", district: "Ukerewe", location: "Ukerewe, Mwanza", crop: "Rice", total_tonnes: 400, farmer_count: 122, avg_step: 15, days_to_harvest: 31, harvest_from: "2026-07-18", harvest_to: "2026-07-28", confidence: "high" },
+  { region: "Mwanza", district: "Nyamagana", location: "Nyamagana, Mwanza", crop: "Groundnuts", total_tonnes: 310, farmer_count: 88, avg_step: 7, days_to_harvest: 33, harvest_from: "2026-07-20", harvest_to: "2026-07-30", confidence: "low" },
 ]
 
 export const FARMERS = [

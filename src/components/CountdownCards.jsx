@@ -68,7 +68,7 @@ export default function CountdownCards({ forecast }) {
               </div>
               <div className="text-[9px] text-gray-400 uppercase tracking-wide mt-1">days to harvest</div>
 
-              <div className="text-xs text-gray-500 mt-3">{item.region}</div>
+              <div className="text-xs text-gray-500 mt-3">{item.location || item.region}</div>
 
               <div className="border-t border-gray-50 mt-3 pt-3">
                 <div className="flex justify-between text-[10px] text-gray-500 mb-1.5">
