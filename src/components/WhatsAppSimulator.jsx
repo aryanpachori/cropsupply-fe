@@ -80,7 +80,9 @@ export default function WhatsAppSimulator() {
   const bottomRef = useRef(null)
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (messages.length > 1 || typing) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
   }, [messages, typing])
 
   function now() {
