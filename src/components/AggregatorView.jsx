@@ -109,7 +109,7 @@ export default function AggregatorView({ regionFilter, cropFilter }) {
       {showTop && (
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="fixed bottom-5 right-5 w-9 h-9 rounded-full text-white flex items-center justify-center shadow-md transition-colors text-sm z-50 hover:opacity-90"
+          className="fixed bottom-7 right-20 w-9 h-9 rounded-full text-white flex items-center justify-center shadow-md transition-colors text-sm z-50 hover:opacity-90"
           style={{ background: '#0F6E56' }}
         >
           ↑
