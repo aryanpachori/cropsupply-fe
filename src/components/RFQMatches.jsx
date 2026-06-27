@@ -1,7 +1,9 @@
 'use client'
 
+import { useState } from 'react'
 import Badge from './ui/Badge'
 import { CROP_EMOJI } from '@/styles/tokens'
+import DealFlow from './DealFlow'
 
 function statusVariant(status) {
   if (status === 'matched') return 'green'
@@ -40,8 +42,18 @@ function formatDate(d) {
 }
 
 export default function RFQMatches({ rfqs }) {
+  const [deal, setDeal] = useState(null)
+
   return (
     <div className="mb-6">
+      {deal && (
+        <DealFlow
+          type="buyer_to_supplier"
+          buyerData={deal.buyer}
+          supplierData={deal.supplier}
+          onClose={() => setDeal(null)}
+        />
+      )}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-[#185FA5] animate-pulse" />
@@ -83,7 +95,28 @@ export default function RFQMatches({ rfqs }) {
 
               {rfq.match_status === 'matched' && (
                 <div className="mt-3 pt-3 border-t border-gray-50">
-                  <button className="text-[11px] font-medium text-white px-4 py-2 rounded-xl transition-colors hover:opacity-90" style={{ background: '#0F6E56' }}>
+                  <button
+                    onClick={() => setDeal({
+                      buyer: {
+                        name: rfq.region + ' Buyer',
+                        location: rfq.region,
+                        crop: rfq.crop,
+                        qty_tonnes: rfq.qty_kg >= 1000 ? rfq.qty_kg / 1000 : rfq.qty_kg,
+                        price_tzs: 500,
+                        grade: rfq.grade,
+                        frequency: 'one-time',
+                        needed_by: rfq.needed_by,
+                      },
+                      supplier: {
+                        name: 'Matched supplier',
+                        location: rfq.region,
+                        harvest_window: rfq.needed_by,
+                        confidence: 'high',
+                      },
+                    })}
+                    className="text-[11px] font-medium text-white px-4 py-2 rounded-xl transition-colors hover:opacity-90"
+                    style={{ background: '#0F6E56' }}
+                  >
                     Connect with suppliers →
                   </button>
                 </div>

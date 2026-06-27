@@ -5,6 +5,7 @@ import ProgressBar from './ui/ProgressBar'
 import { CROP_EMOJI } from '@/styles/tokens'
 import { STAGE_VOLUME } from '@/lib/dummy'
 import ContractFarmingForm from './ContractFarmingForm'
+import DealFlow from './DealFlow'
 
 function formatTonnes(t) {
   if (t >= 1000000) return (t / 1000000).toFixed(1) + 'M T'
@@ -63,9 +64,18 @@ function DetailView({ stage, onBack }) {
   const totalTonnes = stage.crops.reduce((s, c) => s + c.tonnes, 0)
   const isContract = stage.action === 'contract_farming'
   const [formCrop, setFormCrop] = useState(null)
+  const [bookDeal, setBookDeal] = useState(null)
 
   return (
     <div>
+      {bookDeal && (
+        <DealFlow
+          type="buyer_to_supplier"
+          buyerData={bookDeal.buyer}
+          supplierData={bookDeal.supplier}
+          onClose={() => setBookDeal(null)}
+        />
+      )}
       {formCrop && (
         <ContractFarmingForm
           stage={stage.stage}
@@ -128,7 +138,30 @@ function DetailView({ stage, onBack }) {
               />
             </div>
             <button
-              onClick={() => isContract && setFormCrop(c)}
+              onClick={() => {
+                if (isContract) {
+                  setFormCrop(c)
+                } else {
+                  setBookDeal({
+                    buyer: {
+                      name: 'You (Aggregator)',
+                      location: c.regions[0],
+                      crop: c.crop,
+                      qty_tonnes: Math.round(c.tonnes / 100),
+                      price_tzs: 500,
+                      grade: 'A',
+                      frequency: 'one-time',
+                      delivery_window: `Stage ${stage.stage} — imminent`,
+                    },
+                    supplier: {
+                      name: `${c.crop} farmers in ${c.regions[0]}`,
+                      location: c.regions.join(', '),
+                      harvest_window: `Stage ${stage.stage} of 19`,
+                      confidence: 'high',
+                    },
+                  })
+                }
+              }}
               className="mt-3 w-full text-xs font-medium py-2 rounded-xl text-white transition-opacity hover:opacity-90"
               style={{ background: isContract ? '#185FA5' : '#0F6E56' }}
             >

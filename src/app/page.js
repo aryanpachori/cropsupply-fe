@@ -6,7 +6,7 @@ import { useState } from 'react'
 import Navbar from '@/components/Navbar'
 import ViewSwitcher from '@/components/ViewSwitcher'
 import AggregatorView from '@/components/AggregatorView'
-import FarmerView from '@/components/FarmerView'
+import SupplierView from '@/components/SupplierView'
 import PriceTrends from '@/components/PriceTrends'
 import GlobalTrends from '@/components/GlobalTrends'
 import TrendCharts from '@/components/TrendCharts'
@@ -51,7 +51,7 @@ function AppContent() {
           {activeNav === 'harvest-intel' && activeView === 'aggregator' && (
             <AggregatorView regionFilter={regionFilter} cropFilter={cropFilter} />
           )}
-          {activeNav === 'harvest-intel' && activeView === 'farmer' && <FarmerView />}
+          {activeNav === 'harvest-intel' && activeView === 'farmer' && <SupplierView />}
 
           {/* On Trends */}
           {activeNav === 'on-trends' && (
