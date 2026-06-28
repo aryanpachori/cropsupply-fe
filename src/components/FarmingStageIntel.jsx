@@ -186,6 +186,70 @@ export default function FarmingStageIntel() {
 
   return (
     <div className="mb-6">
+      {/* Coming Soon Banner */}
+      <div className="bg-[#085041] rounded-2xl p-6 mb-6">
+        <div className="flex items-start justify-between mb-4 flex-wrap gap-3">
+          <div>
+            <span className="text-[9px] font-medium bg-white/20 text-white px-3 py-1 rounded-full uppercase tracking-wider">
+              Launching Tuesday · Soft launch
+            </span>
+            <h2 className="text-xl font-medium text-white mt-3 mb-1">
+              Harvest Intelligence
+            </h2>
+            <p className="text-[11px] text-white/60 max-w-lg leading-relaxed">
+              The world&apos;s first ward-level crop supply intelligence platform.
+              Know what&apos;s being grown, where, and when — before it reaches market.
+            </p>
+          </div>
+          <div className="text-right">
+            <div className="text-3xl font-medium text-white leading-none">20K+</div>
+            <div className="text-[10px] text-white/50 mt-1">farming plans · Simamia CRM</div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 mb-5">
+          {[
+            { icon: "📍", title: "Country → Region → Ward → Crop drill-down", sub: "Tanzania, Kenya, Uganda — customized per country. Ward-level granularity nobody else has.", status: "core" },
+            { icon: "🌱", title: "Forecasted volume per farming stage", sub: "See exactly how many kg of any crop is at each of the 19 stages right now — from field inspection to crop storage.", status: "core" },
+            { icon: "⏱", title: "Live harvest countdown by location", sub: "Days until first supply hits each aggregation point — village warehouse, local market, port.", status: "core" },
+            { icon: "📈", title: "Price direction signals", sub: "Large supply incoming → price drop flag. Low supply → spike warning. Per crop, per location, per season.", status: "core" },
+            { icon: "🤝", title: "RFQ matching — demand to incoming supply", sub: "Your demand for 400kg Maize matched to incoming Arusha harvest in 12 days automatically.", status: "core" },
+            { icon: "📋", title: "Contract farming — stages 1–9", sub: "Lock forward contracts with farmers still growing. Factories and exporters secure supply before it reaches market.", status: "core" },
+            { icon: "📱", title: "WhatsApp & SMS pre-harvest registration", sub: "Farmers register harvest via WhatsApp in any language. NLP extracts intent. Agent verifies. Data flows into forecast.", status: "core" },
+            { icon: "🤖", title: "AI buyer & supplier matching at scale", sub: "AI reaches 10,000+ targeted suppliers or buyers per day. Manages conversations. Delivers qualified leads. Closes deals.", status: "coming" },
+            { icon: "🌍", title: "Global supply outlook — 37+ countries", sub: "Aggregated from MazaoHub + partner agritechs, cooperatives, government boards, NGOs across Africa, India, Latin America.", status: "coming" },
+          ].map((item, i) => (
+            <div key={i} className={`rounded-xl p-3 flex gap-3 items-start ${item.status === 'coming' ? 'bg-white/5 border border-white/10' : 'bg-white/10'}`}>
+              <span className="text-base flex-shrink-0 mt-0.5">{item.icon}</span>
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[11px] font-medium text-white leading-tight">{item.title}</span>
+                  {item.status === 'coming' && (
+                    <span className="text-[8px] bg-white/10 text-white/50 px-1.5 py-0.5 rounded-full flex-shrink-0">Soon</span>
+                  )}
+                </div>
+                <p className="text-[9px] text-white/50 leading-relaxed">{item.sub}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div className="flex gap-4 text-[10px] text-white/40">
+            <span>150K+ farmers tracked</span>
+            <span>·</span>
+            <span>14–20K Simamia CRM records</span>
+            <span>·</span>
+            <span>205K+ soil samples</span>
+            <span>·</span>
+            <span>14 Tanzania regions</span>
+          </div>
+          <button className="text-[11px] font-medium bg-white text-[#085041] px-5 py-2 rounded-xl hover:bg-white/90 transition-colors flex-shrink-0">
+            Request early access →
+          </button>
+        </div>
+      </div>
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-4">
         <div>
