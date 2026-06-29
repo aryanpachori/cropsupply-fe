@@ -6,6 +6,7 @@ import { CROP_EMOJI } from '@/styles/tokens'
 import { STAGE_VOLUME } from '@/lib/dummy'
 import ContractFarmingForm from './ContractFarmingForm'
 import DealFlow from './DealFlow'
+import EarlyAccessModal from './EarlyAccessModal'
 
 function formatTonnes(t) {
   if (t >= 1000000) return (t / 1000000).toFixed(1) + 'M T'
@@ -178,6 +179,7 @@ function DetailView({ stage, onBack }) {
 
 export default function FarmingStageIntel() {
   const [activeStage, setActiveStage] = useState(null)
+  const [showEarlyAccess, setShowEarlyAccess] = useState(false)
 
   if (activeStage !== null) {
     const stage = STAGE_VOLUME.find(s => s.stage === activeStage)
@@ -202,8 +204,8 @@ export default function FarmingStageIntel() {
             </p>
           </div>
           <div className="text-right">
-            <div className="text-3xl font-medium text-white leading-none">20K+</div>
-            <div className="text-[10px] text-white/50 mt-1">farming plans · Simamia CRM</div>
+            <div className="text-3xl font-medium text-white leading-none">260K+</div>
+            <div className="text-[10px] text-white/50 mt-1">farm data · harvest forecast per stages</div>
           </div>
         </div>
 
@@ -235,16 +237,19 @@ export default function FarmingStageIntel() {
         </div>
 
         <div className="flex items-center justify-between flex-wrap gap-3">
-          <div className="flex gap-4 text-[10px] text-white/40">
-            <span>150K+ farmers tracked</span>
+          <div className="flex gap-3 text-[10px] text-white/40 flex-wrap">
+            <span>555K+ farmers</span>
             <span>·</span>
-            <span>14–20K Simamia CRM records</span>
+            <span>260K+ farm data records</span>
             <span>·</span>
-            <span>205K+ soil samples</span>
+            <span>644K+ soil tests made to date</span>
             <span>·</span>
             <span>14 Tanzania regions</span>
           </div>
-          <button className="text-[11px] font-medium bg-white text-[#085041] px-5 py-2 rounded-xl hover:bg-white/90 transition-colors flex-shrink-0">
+          <button
+            onClick={() => setShowEarlyAccess(true)}
+            className="text-[11px] font-medium bg-white text-[#085041] px-5 py-2 rounded-xl hover:bg-white/90 transition-colors flex-shrink-0"
+          >
             Request early access →
           </button>
         </div>
@@ -320,6 +325,10 @@ export default function FarmingStageIntel() {
           )
         })}
       </div>
+
+      {showEarlyAccess && (
+        <EarlyAccessModal onClose={() => setShowEarlyAccess(false)} />
+      )}
     </div>
   )
 }
