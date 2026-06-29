@@ -12,7 +12,7 @@ function severityDotColor(severity) {
 
 export default function InsightSummaryBar({ onInsightClick }) {
   return (
-    <div className="sticky top-[108px] z-30 py-2 px-4 mb-4" style={{ background: '#085041' }}>
+    <div className="sticky top-[148px] z-30 py-2 px-4 mb-4" style={{ background: '#085041' }}>
       <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
         <span className="text-[9px] uppercase tracking-wide text-white/50 font-medium flex-shrink-0 mr-1">AI insights</span>
         {TOP_INSIGHTS.map((insight) => (

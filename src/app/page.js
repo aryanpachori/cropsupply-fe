@@ -36,7 +36,7 @@ function AppContent() {
     <>
       <main>
         <Navbar />
-        <div className="pt-[72px]">
+        <div className="pt-[112px]">
           {showViewSwitcher && (
             <ViewSwitcher
               activeView={activeView}
