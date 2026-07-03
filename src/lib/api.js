@@ -1,14 +1,25 @@
-import axios from 'axios'
+const BASE = process.env.NEXT_PUBLIC_API_URL || 'https://smartfarming.mazaohub.co.tz'
 
-const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'
-const client = axios.create({ baseURL: BASE })
+async function get(path) {
+  const res = await fetch(`${BASE}${path}`, { next: { revalidate: 300 } })
+  if (!res.ok) throw new Error(`${res.status} ${path}`)
+  return res.json()
+}
 
-export const getKPIs = () => client.get('/api/harvest/kpis').then(r => r.data)
-export const getForecast = (region, crop) => client.get('/api/harvest/forecast', { params: { region, crop } }).then(r => r.data)
-export const getFarmers = (region, crop) => client.get('/api/harvest/farmers', { params: { region, crop } }).then(r => r.data)
-export const getTrends = () => client.get('/api/harvest/trends').then(r => r.data)
-export const getHeatmap = () => client.get('/api/harvest/heatmap').then(r => r.data)
-export const getRFQMatches = () => client.get('/api/rfq/match').then(r => r.data)
-export const getAggPoints = (region) => client.get('/api/harvest/aggregation-points', { params: { region } }).then(r => r.data)
+function qs(params) {
+  const p = new URLSearchParams()
+  Object.entries(params).forEach(([k, v]) => { if (v != null && v !== '') p.set(k, v) })
+  const s = p.toString()
+  return s ? '?' + s : ''
+}
 
-// To switch from dummy to live: in each page/component replace dummy import with the matching function above
+export const api = {
+  health:      ()                          => get('/health'),
+  kpis:        ()                          => get('/api/harvest/kpis'),
+  stageVolume: (region, crop, ward)        => get('/api/harvest/stage-volume' + qs({ region, crop, ward })),
+  forecast:    (region, crop)              => get('/api/harvest/forecast' + qs({ region, crop })),
+  heatmap:     ()                          => get('/api/harvest/heatmap'),
+  trends:      (crop)                      => get('/api/harvest/trends' + qs({ crop })),
+  rfqMatch:    (crop)                      => get('/api/rfq/match' + qs({ crop })),
+  farmers:     (region, crop, stage, limit = 100) => get('/api/harvest/farmers' + qs({ region, crop, stage, limit })),
+}

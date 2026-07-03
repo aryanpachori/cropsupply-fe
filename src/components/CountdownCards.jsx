@@ -5,7 +5,7 @@ import Badge from './ui/Badge'
 import ProgressBar from './ui/ProgressBar'
 import { CROP_EMOJI } from '@/styles/tokens'
 
-const VISIBLE_DEFAULT = 4
+const VISIBLE_DEFAULT = 8
 
 function accentColor(days) {
   if (days <= 14) return '#1D9E75'

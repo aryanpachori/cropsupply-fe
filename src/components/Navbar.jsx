@@ -6,14 +6,16 @@ import HarvestAnnouncementBanner from './HarvestAnnouncementBanner'
 import { useNav } from '@/context/NavContext'
 
 const TICKER_ITEMS = [
-  { text: 'Maize · TZS 500/kg', arrow: '▼ 9.1%', type: 'down' },
-  { text: 'Rice · TZS 1,150/kg', arrow: '▲ 4.5%', type: 'up' },
-  { text: 'Onion · TZS 950/kg', arrow: '▲ 18.8%', type: 'up' },
-  { text: 'Avocado · TZS 10,000/T', arrow: '▬ Stable', type: 'stable' },
-  { text: 'Groundnuts · TZS 2,500/kg', arrow: '▲ 25.0%', type: 'up' },
-  { text: 'Watermelon · TZS 500/pc', arrow: '▲ 2.3%', type: 'up' },
-  { text: 'Chickpeas · TZS 1,200/kg', arrow: '▼ 5.1%', type: 'down' },
-  { text: 'Chinese cabbage · TZS 30,000/100kg', arrow: '▲ 8.4%', type: 'up' },
+  { text: 'Maize · 16,731T', type: 'stable' },
+  { text: 'Rice · 14,660T', type: 'stable' },
+  { text: 'Sugarcane · 11,189T', type: 'stable' },
+  { text: 'Tomato · 6,713T', type: 'stable' },
+  { text: 'Onion · 3,314T', type: 'stable' },
+  { text: 'Sunflower · 2,600T', type: 'stable' },
+  { text: 'Beans · 2,407T', type: 'stable' },
+  { text: 'Groundnuts · 1,854T', type: 'stable' },
+  { text: 'Live data · MazaoHub', type: 'stable' },
+  { text: '5,681 farmers · 28 regions', type: 'stable' },
 ]
 
 const NAV_LINKS = [
@@ -22,12 +24,6 @@ const NAV_LINKS = [
   { key: 'harvest-intel', label: 'Harvest Intel' },
   { key: 'warehouses',    label: 'Warehouses' },
 ]
-
-function arrowClass(type) {
-  if (type === 'up') return 'text-[#5DCAA5]'
-  if (type === 'down') return 'text-[#F09595]'
-  return 'text-white/50'
-}
 
 export default function Navbar() {
   const { activeNav, setActiveNav } = useNav()
@@ -129,9 +125,7 @@ export default function Navbar() {
         <div className="h-[30px] overflow-hidden flex items-center" style={{ background: '#085041' }}>
           <div className="flex whitespace-nowrap animate-marquee text-[11px] text-white/70">
             {[...TICKER_ITEMS, ...TICKER_ITEMS].map((item, i) => (
-              <span key={i} className="mr-8">
-                {item.text}&nbsp;&nbsp;<span className={arrowClass(item.type)}>{item.arrow}</span>
-              </span>
+              <span key={i} className="mr-8">{item.text}</span>
             ))}
           </div>
         </div>

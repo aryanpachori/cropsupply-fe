@@ -3,14 +3,24 @@
 import { useState } from 'react'
 import ProgressBar from './ui/ProgressBar'
 import { CROP_EMOJI } from '@/styles/tokens'
-import { STAGE_VOLUME } from '@/lib/dummy'
 import ContractFarmingForm from './ContractFarmingForm'
 import DealFlow from './DealFlow'
-import EarlyAccessModal from './EarlyAccessModal'
+import { useStageVolume } from '@/hooks/useHarvestData'
 
 function formatTonnes(t) {
+  if (!t && t !== 0) return '—'
   if (t >= 1000000) return (t / 1000000).toFixed(1) + 'M T'
   return t.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + 'T'
+}
+
+const STAGE_NUMBER = {
+  'Field inspection': 1, 'Soil Testing and Analysis': 2, 'Land Preparation': 3,
+  'Farm Clearing': 3, 'Improving soil fertility': 4, 'Main field prep': 5,
+  'Harrowing': 5, 'Water harvesting structures': 7, 'Making ridges': 8,
+  'Planting / Sowing': 10, 'Germination Stage': 10, 'Irrigation': 11,
+  'Weed Control': 12, 'Fertilizer application': 13, 'Pest & Disease Management': 14,
+  'Flowering Stage': 15, 'Maturity Stage': 16, 'Harvesting': 17,
+  'Post-Harvest Handling': 18, 'Mavuno': 17, 'Mavuno na maandalizi': 17,
 }
 
 function stageAccent(n) {
@@ -93,7 +103,6 @@ function DetailView({ stage, onBack }) {
         ← Back to all stages
       </button>
 
-      {/* Header card */}
       <div className="rounded-2xl p-5 mb-4 text-white" style={{ background: '#0F6E56' }}>
         <div className="flex justify-between items-start gap-4">
           <div>
@@ -108,14 +117,12 @@ function DetailView({ stage, onBack }) {
         </div>
       </div>
 
-      {/* Contract farming info strip */}
       {isContract && (
         <div className="rounded-xl p-3 mb-4 text-[10px] leading-relaxed" style={{ background: '#E6F1FB', color: '#185FA5' }}>
           Crops at stages 1–9 are still growing. You can lock a forward contract now — specify volume, grade, and delivery window. The system will match you with farmers at this stage in the right regions.
         </div>
       )}
 
-      {/* Per-crop breakdown */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
         {stage.crops.map((c, i) => (
           <div key={i} className="bg-white rounded-xl border border-gray-100 p-4">
@@ -132,11 +139,7 @@ function DetailView({ stage, onBack }) {
               ))}
             </div>
             <div className="mt-3">
-              <ProgressBar
-                value={Math.round((stage.stage / 19) * 100)}
-                height={4}
-                color={isContract ? '#185FA5' : '#1D9E75'}
-              />
+              <ProgressBar value={Math.round((stage.stage / 19) * 100)} height={4} color={isContract ? '#185FA5' : '#1D9E75'} />
             </div>
             <button
               onClick={() => {
@@ -144,22 +147,8 @@ function DetailView({ stage, onBack }) {
                   setFormCrop(c)
                 } else {
                   setBookDeal({
-                    buyer: {
-                      name: 'You (Aggregator)',
-                      location: c.regions[0],
-                      crop: c.crop,
-                      qty_tonnes: Math.round(c.tonnes / 100),
-                      price_tzs: 500,
-                      grade: 'A',
-                      frequency: 'one-time',
-                      delivery_window: `Stage ${stage.stage} — imminent`,
-                    },
-                    supplier: {
-                      name: `${c.crop} farmers in ${c.regions[0]}`,
-                      location: c.regions.join(', '),
-                      harvest_window: `Stage ${stage.stage} of 19`,
-                      confidence: 'high',
-                    },
+                    buyer: { name: 'You (Aggregator)', location: c.regions[0], crop: c.crop, qty_tonnes: Math.round(c.tonnes / 100), price_tzs: 500, grade: 'A', frequency: 'one-time', delivery_window: `Stage ${stage.stage} — imminent` },
+                    supplier: { name: `${c.crop} farmers in ${c.regions[0]}`, location: c.regions.join(', '), harvest_window: `Stage ${stage.stage} of 19`, confidence: 'high' },
                   })
                 }
               }}
@@ -177,9 +166,23 @@ function DetailView({ stage, onBack }) {
   )
 }
 
-export default function FarmingStageIntel() {
+export default function FarmingStageIntel({ lastUpdated }) {
   const [activeStage, setActiveStage] = useState(null)
-  const [showEarlyAccess, setShowEarlyAccess] = useState(false)
+  const { data: liveStageVolume, loading: stageLoading } = useStageVolume()
+
+  // Map live API response to stage cards
+  const stageCards = liveStageVolume
+    ? Object.entries(liveStageVolume).map(([stageName, data]) => {
+        const stageNum = STAGE_NUMBER[stageName] || 10
+        const action = stageNum <= 9 ? 'contract_farming' : 'book_supply'
+        const topCrops = Object.entries(data.top_crops || {})
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 4)
+          .map(([crop, tonnes]) => ({ crop, tonnes }))
+        const topLocations = Object.keys(data.locations || {}).slice(0, 3)
+        return { stageName, stageNum, action, total_tonnes: data.total_tonnes, total_farmers: data.total_farmers, topCrops, topLocations }
+      }).sort((a, b) => b.total_tonnes - a.total_tonnes)
+    : null
 
   if (activeStage !== null) {
     const stage = STAGE_VOLUME.find(s => s.stage === activeStage)
@@ -188,74 +191,31 @@ export default function FarmingStageIntel() {
 
   return (
     <div className="mb-6">
-      {/* Coming Soon Banner */}
-      <div className="bg-[#085041] rounded-2xl p-6 mb-6">
-        <div className="flex items-start justify-between mb-4 flex-wrap gap-3">
-          <div>
-            <span className="text-[9px] font-medium bg-white/20 text-white px-3 py-1 rounded-full uppercase tracking-wider">
-              Launching Tuesday · Soft launch
-            </span>
-            <h2 className="text-xl font-medium text-white mt-3 mb-1">
-              Harvest Intelligence
-            </h2>
-            <p className="text-[11px] text-white/60 max-w-lg leading-relaxed">
-              The world&apos;s first ward-level crop supply intelligence platform.
-              Know what&apos;s being grown, where, and when — before it reaches market.
-            </p>
-          </div>
-          <div className="text-right">
-            <div className="text-3xl font-medium text-white leading-none">260K+</div>
-            <div className="text-[10px] text-white/50 mt-1">farm data · harvest forecast per stages</div>
-          </div>
+      {/* Live data header */}
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-[#1D9E75] animate-pulse" />
+          <span className="text-[11px] font-medium text-gray-600">
+            Live harvest intelligence
+            {lastUpdated && (
+              <span className="text-gray-400 font-normal ml-1">
+                · {new Date(lastUpdated).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+              </span>
+            )}
+          </span>
         </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 mb-5">
-          {[
-            { icon: "📍", title: "Country → Region → Ward → Crop drill-down", sub: "Tanzania, Kenya, Uganda — customized per country. Ward-level granularity nobody else has.", status: "core" },
-            { icon: "🌱", title: "Forecasted volume per farming stage", sub: "See exactly how many kg of any crop is at each of the 19 stages right now — from field inspection to crop storage.", status: "core" },
-            { icon: "⏱", title: "Live harvest countdown by location", sub: "Days until first supply hits each aggregation point — village warehouse, local market, port.", status: "core" },
-            { icon: "📈", title: "Price direction signals", sub: "Large supply incoming → price drop flag. Low supply → spike warning. Per crop, per location, per season.", status: "core" },
-            { icon: "🤝", title: "RFQ matching — demand to incoming supply", sub: "Your demand for 400kg Maize matched to incoming Arusha harvest in 12 days automatically.", status: "core" },
-            { icon: "📋", title: "Contract farming — stages 1–9", sub: "Lock forward contracts with farmers still growing. Factories and exporters secure supply before it reaches market.", status: "core" },
-            { icon: "📱", title: "WhatsApp & SMS pre-harvest registration", sub: "Farmers register harvest via WhatsApp in any language. NLP extracts intent. Agent verifies. Data flows into forecast.", status: "core" },
-            { icon: "🤖", title: "AI buyer & supplier matching at scale", sub: "AI reaches 10,000+ targeted suppliers or buyers per day. Manages conversations. Delivers qualified leads. Closes deals.", status: "coming" },
-            { icon: "🌍", title: "Global supply outlook — 37+ countries", sub: "Aggregated from MazaoHub + partner agritechs, cooperatives, government boards, NGOs across Africa, India, Latin America.", status: "coming" },
-          ].map((item, i) => (
-            <div key={i} className={`rounded-xl p-3 flex gap-3 items-start ${item.status === 'coming' ? 'bg-white/5 border border-white/10' : 'bg-white/10'}`}>
-              <span className="text-base flex-shrink-0 mt-0.5">{item.icon}</span>
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[11px] font-medium text-white leading-tight">{item.title}</span>
-                  {item.status === 'coming' && (
-                    <span className="text-[8px] bg-white/10 text-white/50 px-1.5 py-0.5 rounded-full flex-shrink-0">Soon</span>
-                  )}
-                </div>
-                <p className="text-[9px] text-white/50 leading-relaxed">{item.sub}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <div className="flex gap-3 text-[10px] text-white/40 flex-wrap">
-            <span>555K+ farmers</span>
-            <span>·</span>
-            <span>260K+ farm data records</span>
-            <span>·</span>
-            <span>644K+ soil tests made to date</span>
-            <span>·</span>
-            <span>14 Tanzania regions</span>
-          </div>
-          <button
-            onClick={() => setShowEarlyAccess(true)}
-            className="text-[11px] font-medium bg-white text-[#085041] px-5 py-2 rounded-xl hover:bg-white/90 transition-colors flex-shrink-0"
-          >
-            Request early access →
-          </button>
+        <div className="flex gap-3 text-[10px] text-gray-400 flex-wrap">
+          <span>5,681 farmers tracked</span>
+          <span>·</span>
+          <span>28 regions</span>
+          <span>·</span>
+          <span>83,855T predicted yield</span>
+          <span>·</span>
+          <span>Updated every 6h</span>
         </div>
       </div>
 
-      {/* Header */}
+      {/* Stage legend */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-4">
         <div>
           <div className="text-sm font-medium text-gray-700">Forecasted volume by farming stage</div>
@@ -273,61 +233,97 @@ export default function FarmingStageIntel() {
         </div>
       </div>
 
-      {/* Stage grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {STAGE_VOLUME.map(s => {
-          const totalTonnes = s.crops.reduce((sum, c) => sum + c.tonnes, 0)
-          const accent = stageAccent(s.stage)
-          const allRegions = s.crops[0].regions.join(', ')
-          const hasMoreCrops = s.crops.length > 1
-
-          return (
-            <div
-              key={s.stage}
-              onClick={() => setActiveStage(s.stage)}
-              className="bg-white rounded-2xl border border-gray-100 p-4 cursor-pointer hover:shadow-md hover:border-[#1D9E75] transition-all duration-150"
-              style={{ borderLeft: `3px solid ${accent}` }}
-            >
-              {/* Top row */}
-              <div className="flex justify-between items-start mb-3">
-                <div>
-                  <div className="text-[10px] text-gray-400">Stage {s.stage}</div>
-                  <div className="text-xs font-medium text-gray-800 mt-0.5">{s.name}</div>
-                </div>
-                <ActionBadge action={s.action} />
-              </div>
-
-              {/* Volume */}
-              <div className="text-2xl font-medium text-gray-900 leading-none">
-                {formatTonnes(totalTonnes)}
-              </div>
-
-              {/* Crop pills */}
-              <div className="flex gap-1 flex-wrap mt-2">
-                {s.crops.map((c, i) => (
-                  <span key={i} className="text-[9px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                    {CROP_EMOJI[c.crop] || CROP_EMOJI.default} {c.crop} {c.tonnes.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}T
-                  </span>
-                ))}
-              </div>
-
-              {/* Regions */}
-              <div className="text-[9px] text-gray-400 mt-2 truncate">
-                {allRegions}{hasMoreCrops ? '...' : ''}
-              </div>
-
-              {/* Bottom CTA */}
-              <div className="mt-3 pt-3 border-t border-gray-50 flex justify-between items-center">
-                <span className="text-[10px] font-medium" style={{ color: '#0F6E56' }}>View breakdown →</span>
-                <span className="text-[9px] text-gray-400">~{Math.round(totalTonnes / 3.5).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')} farmers</span>
-              </div>
+      {/* Stage grid — live data if available, dummy fallback */}
+      {stageLoading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="bg-white rounded-2xl border border-gray-100 p-4 animate-pulse">
+              <div className="h-3 bg-gray-100 rounded w-1/3 mb-3" />
+              <div className="h-7 bg-gray-100 rounded w-1/2 mb-3" />
+              <div className="h-2 bg-gray-100 rounded w-full" />
             </div>
-          )
-        })}
-      </div>
-
-      {showEarlyAccess && (
-        <EarlyAccessModal onClose={() => setShowEarlyAccess(false)} />
+          ))}
+        </div>
+      ) : stageCards ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {stageCards.map((s, i) => {
+            const accent = stageAccent(s.stageNum)
+            return (
+              <div
+                key={i}
+                onClick={() => setActiveStage(s.stageNum)}
+                className="bg-white rounded-2xl border border-gray-100 p-4 cursor-pointer hover:shadow-md hover:border-[#1D9E75] transition-all duration-150"
+                style={{ borderLeft: `3px solid ${accent}` }}
+              >
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <div className="text-[10px] text-gray-400">Stage {s.stageNum}</div>
+                    <div className="text-xs font-medium text-gray-800 mt-0.5">{s.stageName}</div>
+                  </div>
+                  <ActionBadge action={s.action} />
+                </div>
+                <div className="text-2xl font-medium text-gray-900 leading-none">
+                  {formatTonnes(s.total_tonnes)}
+                </div>
+                <div className="flex gap-1 flex-wrap mt-2">
+                  {s.topCrops.map((c, j) => (
+                    <span key={j} className="text-[9px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                      {CROP_EMOJI[c.crop] || CROP_EMOJI.default} {c.crop} {formatTonnes(c.tonnes)}
+                    </span>
+                  ))}
+                </div>
+                <div className="text-[9px] text-gray-400 mt-2 truncate">
+                  📍 {s.topLocations.join(', ')}
+                </div>
+                <div className="mt-3 pt-3 border-t border-gray-50 flex justify-between items-center">
+                  <span className="text-[10px] font-medium" style={{ color: '#0F6E56' }}>View breakdown →</span>
+                  <span className="text-[9px] text-gray-400">{s.total_farmers?.toLocaleString()} farmers</span>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      ) : (
+        /* Dummy fallback */
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {STAGE_VOLUME.map(s => {
+            const totalTonnes = s.crops.reduce((sum, c) => sum + c.tonnes, 0)
+            const accent = stageAccent(s.stage)
+            const allRegions = s.crops[0].regions.join(', ')
+            const hasMoreCrops = s.crops.length > 1
+            return (
+              <div
+                key={s.stage}
+                onClick={() => setActiveStage(s.stage)}
+                className="bg-white rounded-2xl border border-gray-100 p-4 cursor-pointer hover:shadow-md hover:border-[#1D9E75] transition-all duration-150"
+                style={{ borderLeft: `3px solid ${accent}` }}
+              >
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <div className="text-[10px] text-gray-400">Stage {s.stage}</div>
+                    <div className="text-xs font-medium text-gray-800 mt-0.5">{s.name}</div>
+                  </div>
+                  <ActionBadge action={s.action} />
+                </div>
+                <div className="text-2xl font-medium text-gray-900 leading-none">{formatTonnes(totalTonnes)}</div>
+                <div className="flex gap-1 flex-wrap mt-2">
+                  {s.crops.map((c, i) => (
+                    <span key={i} className="text-[9px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                      {CROP_EMOJI[c.crop] || CROP_EMOJI.default} {c.crop} {c.tonnes.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}T
+                    </span>
+                  ))}
+                </div>
+                <div className="text-[9px] text-gray-400 mt-2 truncate">
+                  {allRegions}{hasMoreCrops ? '...' : ''}
+                </div>
+                <div className="mt-3 pt-3 border-t border-gray-50 flex justify-between items-center">
+                  <span className="text-[10px] font-medium" style={{ color: '#0F6E56' }}>View breakdown →</span>
+                  <span className="text-[9px] text-gray-400">~{Math.round(totalTonnes / 3.5).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')} farmers</span>
+                </div>
+              </div>
+            )
+          })}
+        </div>
       )}
     </div>
   )

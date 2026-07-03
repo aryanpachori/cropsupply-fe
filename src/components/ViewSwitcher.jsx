@@ -1,9 +1,17 @@
 'use client'
 
-import { FORECAST } from '@/lib/dummy'
+const REGIONS = [
+  'Arusha','Dar es Salaam','Dodoma','Geita','Iringa','Kagera','Katavi','Kigoma',
+  'Kilimanjaro','Lindi','Manyara','Mara','Mbeya','Morogoro','Mtwara','Mwanza',
+  'Njombe','Pemba North','Pemba South','Pwani','Rukwa','Ruvuma','Shinyanga',
+  'Simiyu','Singida','Tabora','Tanga','Zanzibar',
+]
 
-const regions = [...new Set(FORECAST.map(f => f.region))]
-const crops = [...new Set(FORECAST.map(f => f.crop))]
+const CROPS = [
+  'Maize','Rice','Sugarcane','Tomato','Onion','Sunflower','Beans','Groundnuts',
+  'Cassava','Sweet Potato','Sorghum','Millet','Avocado','Banana','Watermelon',
+  'Chickpeas','Cowpeas','Cotton','Sesame','Tobacco',
+]
 
 export default function ViewSwitcher({ activeView, onViewChange, regionFilter, onRegionChange, cropFilter, onCropChange }) {
   return (
@@ -37,7 +45,7 @@ export default function ViewSwitcher({ activeView, onViewChange, regionFilter, o
               className="text-[11px] border border-gray-200 rounded-lg px-3 py-1.5 bg-white text-gray-700 focus:outline-none focus:border-[#1D9E75] transition-colors appearance-none pr-6"
             >
               <option value="">All locations</option>
-              {regions.map(r => <option key={r} value={r}>{r}</option>)}
+              {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
             </select>
             <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-[10px]">▾</span>
           </div>
@@ -48,13 +56,13 @@ export default function ViewSwitcher({ activeView, onViewChange, regionFilter, o
               className="text-[11px] border border-gray-200 rounded-lg px-3 py-1.5 bg-white text-gray-700 focus:outline-none focus:border-[#1D9E75] transition-colors appearance-none pr-6"
             >
               <option value="">All crops</option>
-              {crops.map(c => <option key={c} value={c}>{c}</option>)}
+              {CROPS.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
             <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-[10px]">▾</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-1.5 h-1.5 rounded-full bg-[#1D9E75] animate-pulse" />
-            <span className="text-[10px] text-gray-400">Live · updated 6h ago</span>
+            <span className="text-[10px] text-gray-400">Live · MazaoHub</span>
           </div>
         </div>
       )}

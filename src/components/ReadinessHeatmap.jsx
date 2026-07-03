@@ -20,12 +20,13 @@ export default function ReadinessHeatmap({ heatmap }) {
         <span className="text-[10px] text-gray-400">% of farmers at activity step 14+ (near harvest)</span>
       </div>
 
-      <div className="grid grid-cols-7 gap-1.5 mb-3">
+      <div className="grid grid-cols-7 sm:grid-cols-10 gap-1.5 mb-3">
         {heatmap.map((item) => (
           <div
             key={item.region}
             className="rounded-xl h-10 flex flex-col items-center justify-center cursor-pointer transition-all duration-150 hover:scale-105 hover:shadow-sm"
             style={{ background: cellBg(item.readiness_pct) }}
+            title={`${item.region}: ${item.readiness_pct}% ready · ${item.total_tonnes?.toLocaleString()}T · ${item.farmer_count} farmers`}
           >
             <span
               className="text-[8px] font-medium text-center leading-tight px-1"
