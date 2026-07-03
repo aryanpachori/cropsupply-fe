@@ -1,15 +1,16 @@
 'use client'
 
 import Card from './ui/Card'
+import { fmt, fmtTonnes } from '@/lib/utils'
 
 export default function KPIBar({ kpis }) {
   const cards = [
-    { label: 'Farmers tracked',   value: kpis?.total_farmers ? kpis.total_farmers.toLocaleString() + '+' : '—',                              sub: 'MazaoHub active',         color: 'border-l-gray-200',    subColor: 'text-gray-400' },
-    { label: 'Expected yield',    value: kpis?.expected_yield_tonnes ? (kpis.expected_yield_tonnes / 1000).toFixed(1) + 'K T' : '—',          sub: 'Predicted this season',   color: 'border-l-[#1D9E75]',  subColor: 'text-[#1D9E75]' },
-    { label: 'Imminent supply',   value: kpis?.imminent_tonnes_14d ? (kpis.imminent_tonnes_14d / 1000).toFixed(1) + 'K T' : '—',              sub: 'Ready in ≤ 14 days',      color: 'border-l-[#1D9E75]',  subColor: 'text-[#1D9E75]' },
-    { label: 'Regions active',    value: kpis?.regions_active ?? '—',                                                                          sub: 'Tanzania covered',        color: 'border-l-gray-200',    subColor: 'text-gray-400' },
-    { label: 'At harvest stage',  value: kpis?.farmers_at_harvest ? kpis.farmers_at_harvest.toLocaleString() : '—',                            sub: 'Harvesting now',          color: 'border-l-[#1D9E75]',  subColor: 'text-[#1D9E75]' },
-    { label: 'Soil samples',      value: kpis?.soil_samples ? kpis.soil_samples.toLocaleString() + '+' : '—',                                  sub: 'NPK · moisture · pH',     color: 'border-l-[#185FA5]',  subColor: 'text-gray-400' },
+    { label: 'Farmers tracked',  value: fmt(kpis?.total_farmers) + (kpis?.total_farmers ? '+' : ''), sub: 'MazaoHub active',       color: 'border-l-gray-200',   subColor: 'text-gray-400' },
+    { label: 'Expected yield',   value: fmtTonnes(kpis?.expected_yield_tonnes),                       sub: 'Predicted this season', color: 'border-l-[#1D9E75]', subColor: 'text-[#1D9E75]' },
+    { label: 'Imminent supply',  value: fmtTonnes(kpis?.imminent_tonnes_14d),                         sub: 'Ready in ≤ 14 days',    color: 'border-l-[#1D9E75]', subColor: 'text-[#1D9E75]' },
+    { label: 'At harvest stage', value: fmt(kpis?.farmers_at_harvest_stage),                          sub: 'Harvesting now',        color: 'border-l-[#EDA100]', subColor: 'text-[#854F0B]' },
+    { label: 'Regions active',   value: kpis?.regions ?? '—',                                         sub: 'Tanzania covered',      color: 'border-l-gray-200',   subColor: 'text-gray-400' },
+    { label: 'Soil samples',     value: fmt(kpis?.soil_samples) + (kpis?.soil_samples ? '+' : ''),   sub: 'NPK · moisture · pH',   color: 'border-l-[#185FA5]', subColor: 'text-gray-400' },
   ]
 
   return (

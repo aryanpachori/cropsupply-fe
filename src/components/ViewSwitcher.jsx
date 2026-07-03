@@ -15,7 +15,7 @@ const CROPS = [
 
 export default function ViewSwitcher({ activeView, onViewChange, regionFilter, onRegionChange, cropFilter, onCropChange }) {
   return (
-    <div className="bg-white border-b border-gray-100 sticky top-[112px] z-40 px-4 py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+    <div className="bg-white border-b border-gray-100 sticky top-[78px] z-40 px-4 py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
       <div className="flex bg-gray-100 rounded-xl p-0.5 gap-0.5">
         {['Aggregator / Buyer', 'Farmer / Supplier'].map((label) => {
           const view = label === 'Aggregator / Buyer' ? 'aggregator' : 'farmer'

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import GlobalSearch from './GlobalSearch'
-import HarvestAnnouncementBanner from './HarvestAnnouncementBanner'
 import { useNav } from '@/context/NavContext'
 
 const TICKER_ITEMS = [
@@ -131,7 +130,6 @@ export default function Navbar() {
         </div>
       </nav>
 
-      <HarvestAnnouncementBanner />
       <GlobalSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   )

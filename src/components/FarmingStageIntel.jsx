@@ -6,21 +6,120 @@ import { CROP_EMOJI } from '@/styles/tokens'
 import ContractFarmingForm from './ContractFarmingForm'
 import DealFlow from './DealFlow'
 import { useStageVolume } from '@/hooks/useHarvestData'
-
-function formatTonnes(t) {
-  if (!t && t !== 0) return '—'
-  if (t >= 1000000) return (t / 1000000).toFixed(1) + 'M T'
-  return t.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + 'T'
-}
+import { fmtTonnes } from '@/lib/utils'
 
 const STAGE_NUMBER = {
-  'Field inspection': 1, 'Soil Testing and Analysis': 2, 'Land Preparation': 3,
-  'Farm Clearing': 3, 'Improving soil fertility': 4, 'Main field prep': 5,
-  'Harrowing': 5, 'Water harvesting structures': 7, 'Making ridges': 8,
-  'Planting / Sowing': 10, 'Germination Stage': 10, 'Irrigation': 11,
-  'Weed Control': 12, 'Fertilizer application': 13, 'Pest & Disease Management': 14,
+  'Field inspection': 1, 'Soil Testing': 2, 'Soil Testing and Analysis': 2,
+  'Land Preparation': 3, 'Farm Clearing': 3, 'Improving soil fertility': 4,
+  'Improving Soil Fertility': 4, 'Harrowing': 5, 'Water harvesting structures': 7,
+  'Making ridges': 8, 'Planting / Sowing': 10, 'Germination Stage': 10,
+  'Irrigation': 11, 'Weed Control': 12, 'Fertilizer application': 13,
+  'Fertilizer Application': 13, 'Pest Control': 14, 'Pest & Disease Management': 14,
   'Flowering Stage': 15, 'Maturity Stage': 16, 'Harvesting': 17,
-  'Post-Harvest Handling': 18, 'Mavuno': 17, 'Mavuno na maandalizi': 17,
+  'Post-Harvest Handling': 18, 'Vegetative Growth': 11,
+}
+
+const STAGE_GROUPS = {
+  'Harvesting': [
+    'Harvesting','Mavuno','mavuno','MAVUNO','ANAVUNA','ANAVUNA ','Kuvuna','kuvuna',
+    'KUVUNA','KUVUNA ','Amevuna','amevuna','AMESHAVUNA','KASHAVUNA','kashavuna',
+    'KUVANA','Mvuno na maandalizi','Mavuno na kukua','Mavuno na maandalizi',
+    'Mavuno na kupanda','Maandalizi na mavuno','Maandalizi,mavuno',
+    'mavuno na kutoa maua','umechanua,Amevuna','KUKAUKA MAHINDI','KUIVA KAHAWA',
+    'KUVUNA KAHAWA','KUVUNA KAHAWA ','KUVUNA\\6','Mavuno na maandalizi ya kilimo',
+    'Mavuna na kukua',
+  ],
+  'Maturity Stage': [
+    'Maturity Stage','TAYARI KWA KUVUNWA','Anakaribia kuvuna','ANAKARIBIA KUVUNA',
+    'ANAKARIBIA KUVUNA KAHAWA','Anatarajia kuvuna','ANATAKA KUVUNA','ANATAKA KUVUNA ',
+    'ANYTAKA KUVUNA','ANATAKA KUUVUNA','ANATAKA KUNA ','Laandalizi ya mavuno',
+    'Caandalizi ya mavuno','Kaandalizi ya mavuno','umeiva','TUNDA KUIVA',
+    'Maandalizi ya mavuno','Maandalizi ya kuvuna','maandalizi yakuvuna',
+    'Maandalizi ya kuvuna mwezi wa tano mwishoni',
+  ],
+  'Post-Harvest Handling': [
+    'Post-Harvest Handling','Post-harvest handling','Marketing & Distribution',
+  ],
+  'Land Preparation': [
+    'Land Preparation','Maandalizi','MAANDALIZI','maandalizi','Maandalizi ya shamba',
+    'ANAANDAA SHAMBA','ANAANDAA SHAMBA ','Anaandaa shamba','Kaandalizi','Farm Clearing',
+  ],
+  'Planting / Sowing': [
+    'Planting / Sowing','Anapanda','Anapanda mahindi','KUPANDA MAHAGE','Amepanda',
+    'Kupanda','amepanda na anafanya maandalizi ya mavuno ya mpunga',
+    'Ekari 1.5 amepanda na nyingine yuko kwenye maandalizi',
+    'Seed Selection','Kitalu','NYANYA ZIPO KWENYE KITALU',
+  ],
+  'Vegetative Growth': [
+    'Vegetative Growth Stage','Kukua','kukua','KUKUA','Umestawi','bado mdogo',
+    'MAZAO YAPO SHAMBANI',
+  ],
+  'Flowering Stage': [
+    'Flowering Stage','Umechanua','umechanua','Unachanua','Kuchanua','KUTOA MAUA ',
+    'KUTOA MAUWA','Yabeba','YANAZAA','KAHAWA INAZAA ','KAHAWA CHANGA',
+    'Fruiting / Grain Filling Stage',
+  ],
+  'Irrigation': ['Irrigation','Irrigation / Water Management'],
+  'Weed Control': ['Weed Control','Weeding'],
+  'Fertilizer Application': [
+    'Fertilizer application','Fertilizer Application',
+    'Fertilizer & Nutrient Application','Plant nutrition',
+  ],
+  'Pest Control': [
+    'Pest & Disease Management','Pest control','Pest and disease control',
+  ],
+  'Soil Testing': [
+    'Soil Testing and Analysis','Soil Testing & Analysis','Soil testing',
+  ],
+  'Improving Soil Fertility': ['Improving soil fertility'],
+}
+
+const KNOWN_CROPS = new Set([
+  'Maize','Rice','Beans','Onion','Tomato','Coffee','Sugarcane','Sunflower',
+  'Groundnuts','Avocado','Banana','Potato','Cassava','Sorghum','Cotton',
+  'Sesame','Cowpeas','Pigeon peas','Watermelon','Cabbage','Carrot','Vegetables',
+  'Sweet Potato','Millet','Chickpeas','Tobacco',
+])
+
+function mergeStages(stageVolume) {
+  if (!stageVolume) return {}
+  const reverseMap = {}
+  Object.entries(STAGE_GROUPS).forEach(([group, variants]) => {
+    variants.forEach(v => { reverseMap[v] = group })
+  })
+
+  const merged = {}
+  Object.entries(stageVolume).forEach(([stageName, data]) => {
+    const groupName = reverseMap[stageName] || stageName
+    if (!merged[groupName]) {
+      merged[groupName] = { total_tonnes: 0, total_farmers: 0, top_crops: {}, locations: {} }
+    }
+    merged[groupName].total_tonnes += data.total_tonnes || 0
+    merged[groupName].total_farmers += data.total_farmers || 0
+
+    Object.entries(data.top_crops || {}).forEach(([crop, t]) => {
+      if (crop.length > 25) return
+      merged[groupName].top_crops[crop] = (merged[groupName].top_crops[crop] || 0) + t
+    })
+
+    Object.entries(data.locations || {}).forEach(([loc, locData]) => {
+      if (!merged[groupName].locations[loc]) {
+        merged[groupName].locations[loc] = { tonnes: 0, farmer_count: 0 }
+      }
+      merged[groupName].locations[loc].tonnes += locData.tonnes || 0
+      merged[groupName].locations[loc].farmer_count += locData.farmer_count || 0
+    })
+  })
+
+  Object.keys(merged).forEach(group => {
+    const sorted = Object.entries(merged[group].top_crops)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+    merged[group].top_crops = Object.fromEntries(sorted)
+    merged[group].total_tonnes = Math.round(merged[group].total_tonnes * 10) / 10
+  })
+
+  return merged
 }
 
 function stageAccent(n) {
@@ -41,41 +140,19 @@ function ActionBadge({ action, large }) {
     : <span className="bg-[#E1F5EE] text-[#085041] text-[9px] px-2 py-0.5 rounded-full whitespace-nowrap">Book supply</span>
 }
 
-function StageTimeline({ activeStage }) {
-  return (
-    <div className="mt-4 bg-white rounded-xl border border-gray-100 p-4">
-      <div className="text-[10px] uppercase text-gray-400 tracking-wide mb-3">Stage position in farming cycle</div>
-      <div className="flex items-end gap-0.5">
-        {STAGE_VOLUME.map((s) => {
-          const isCurrent = s.stage === activeStage
-          const isDone = s.stage < activeStage
-          return (
-            <div key={s.stage} className="flex-1 flex flex-col items-center">
-              {isCurrent && <div className="w-2 h-2 rounded-full bg-[#EDA100] mb-0.5" />}
-              <div
-                className="w-full h-2 rounded-sm"
-                style={{ background: isDone ? '#1D9E75' : isCurrent ? '#EDA100' : '#E5E7EB' }}
-              />
-            </div>
-          )
-        })}
-      </div>
-      <div className="flex justify-between text-[9px] text-gray-400 mt-1.5">
-        <span>Field inspection</span>
-        <span style={{ color: stageAccent(activeStage) }} className="font-medium">
-          {STAGE_VOLUME.find(s => s.stage === activeStage)?.name}
-        </span>
-        <span>Crop storage</span>
-      </div>
-    </div>
-  )
-}
-
 function DetailView({ stage, onBack }) {
-  const totalTonnes = stage.crops.reduce((s, c) => s + c.tonnes, 0)
   const isContract = stage.action === 'contract_farming'
   const [formCrop, setFormCrop] = useState(null)
   const [bookDeal, setBookDeal] = useState(null)
+
+  const topCrops = Object.entries(stage.top_crops || {})
+    .filter(([crop]) => crop.length <= 25)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6)
+
+  const topLocations = Object.entries(stage.locations || {})
+    .sort((a, b) => b[1].tonnes - a[1].tonnes)
+    .slice(0, 3)
 
   return (
     <div>
@@ -89,29 +166,22 @@ function DetailView({ stage, onBack }) {
       )}
       {formCrop && (
         <ContractFarmingForm
-          stage={stage.stage}
-          stageName={stage.name}
-          crop={formCrop.crop}
-          region={formCrop.regions[0]}
+          stageName={stage.stageName}
+          crop={formCrop}
           onClose={() => setFormCrop(null)}
         />
       )}
-      <button
-        onClick={onBack}
-        className="flex items-center gap-1 text-[11px] text-gray-500 cursor-pointer mb-4 hover:text-gray-800"
-      >
+      <button onClick={onBack} className="flex items-center gap-1 text-[11px] text-gray-500 cursor-pointer mb-4 hover:text-gray-800">
         ← Back to all stages
       </button>
 
       <div className="rounded-2xl p-5 mb-4 text-white" style={{ background: '#0F6E56' }}>
-        <div className="flex justify-between items-start gap-4">
+        <div className="flex justify-between items-start gap-4 flex-wrap">
           <div>
-            <div className="text-[10px] opacity-60 mb-1">Stage {stage.stage} of 19</div>
-            <div className="text-xl font-medium">{stage.name}</div>
-            <div className="text-3xl font-medium mt-2 leading-none">
-              {totalTonnes.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}T
-            </div>
-            <div className="text-[11px] opacity-70 mt-1">total forecasted volume at this stage</div>
+            <div className="text-[10px] opacity-60 mb-1">Stage {stage.stageNum} of 19</div>
+            <div className="text-xl font-medium">{stage.stageName}</div>
+            <div className="text-3xl font-medium mt-2 leading-none">{fmtTonnes(stage.total_tonnes)}</div>
+            <div className="text-[11px] opacity-70 mt-1">total forecasted volume · {stage.total_farmers?.toLocaleString()} farmers</div>
           </div>
           <ActionBadge action={stage.action} large />
         </div>
@@ -119,36 +189,29 @@ function DetailView({ stage, onBack }) {
 
       {isContract && (
         <div className="rounded-xl p-3 mb-4 text-[10px] leading-relaxed" style={{ background: '#E6F1FB', color: '#185FA5' }}>
-          Crops at stages 1–9 are still growing. You can lock a forward contract now — specify volume, grade, and delivery window. The system will match you with farmers at this stage in the right regions.
+          Crops at stages 1–9 are still growing. Lock a forward contract now — specify volume, grade, and delivery window. The system matches you with farmers at this stage in the right regions.
         </div>
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-        {stage.crops.map((c, i) => (
+        {topCrops.map(([crop, tonnes], i) => (
           <div key={i} className="bg-white rounded-xl border border-gray-100 p-4">
             <div className="flex items-center gap-2">
-              <span className="text-lg">{CROP_EMOJI[c.crop] || CROP_EMOJI.default}</span>
-              <span className="text-sm font-medium text-gray-800">{c.crop}</span>
+              <span className="text-lg">{CROP_EMOJI[crop] || CROP_EMOJI.default}</span>
+              <span className="text-sm font-medium text-gray-800">{crop}</span>
             </div>
-            <div className="text-2xl font-medium mt-2" style={{ color: '#0F6E56' }}>
-              {c.tonnes.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}T
-            </div>
-            <div className="flex gap-1 flex-wrap mt-3">
-              {c.regions.map(r => (
-                <span key={r} className="text-[9px] bg-gray-100 text-gray-600 px-2 py-1 rounded-full">📍 {r}</span>
-              ))}
-            </div>
+            <div className="text-2xl font-medium mt-2" style={{ color: '#0F6E56' }}>{fmtTonnes(tonnes)}</div>
             <div className="mt-3">
-              <ProgressBar value={Math.round((stage.stage / 19) * 100)} height={4} color={isContract ? '#185FA5' : '#1D9E75'} />
+              <ProgressBar value={Math.round((stage.stageNum / 19) * 100)} height={4} color={isContract ? '#185FA5' : '#1D9E75'} />
             </div>
             <button
               onClick={() => {
                 if (isContract) {
-                  setFormCrop(c)
+                  setFormCrop(crop)
                 } else {
                   setBookDeal({
-                    buyer: { name: 'You (Aggregator)', location: c.regions[0], crop: c.crop, qty_tonnes: Math.round(c.tonnes / 100), price_tzs: 500, grade: 'A', frequency: 'one-time', delivery_window: `Stage ${stage.stage} — imminent` },
-                    supplier: { name: `${c.crop} farmers in ${c.regions[0]}`, location: c.regions.join(', '), harvest_window: `Stage ${stage.stage} of 19`, confidence: 'high' },
+                    buyer: { name: 'You (Aggregator)', location: topLocations[0]?.[0] || 'Tanzania', crop, qty_tonnes: Math.round(tonnes / 100), price_tzs: 500, grade: 'A', frequency: 'one-time', delivery_window: `Stage ${stage.stageNum} — imminent` },
+                    supplier: { name: `${crop} farmers`, location: topLocations.map(l => l[0]).join(', ') || 'Tanzania', harvest_window: `Stage ${stage.stageNum} of 19`, confidence: 'high' },
                   })
                 }
               }}
@@ -161,61 +224,68 @@ function DetailView({ stage, onBack }) {
         ))}
       </div>
 
-      <StageTimeline activeStage={stage.stage} />
+      {topLocations.length > 0 && (
+        <div className="bg-white rounded-xl border border-gray-100 p-4">
+          <div className="text-[10px] uppercase tracking-wider text-gray-400 mb-3">Top locations</div>
+          <div className="space-y-2">
+            {topLocations.map(([loc, data]) => (
+              <div key={loc} className="flex items-center justify-between text-[11px]">
+                <span className="text-gray-600">📍 {loc}</span>
+                <div className="flex items-center gap-3 text-gray-400">
+                  <span>{fmtTonnes(data.tonnes)}</span>
+                  <span>{data.farmer_count} farmers</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
 
-export default function FarmingStageIntel({ lastUpdated }) {
+export default function FarmingStageIntel() {
   const [activeStage, setActiveStage] = useState(null)
+  const [showAllStages, setShowAllStages] = useState(false)
   const { data: liveStageVolume, loading: stageLoading } = useStageVolume()
 
-  // Map live API response to stage cards
-  const stageCards = liveStageVolume
-    ? Object.entries(liveStageVolume).map(([stageName, data]) => {
-        const stageNum = STAGE_NUMBER[stageName] || 10
-        const action = stageNum <= 9 ? 'contract_farming' : 'book_supply'
-        const topCrops = Object.entries(data.top_crops || {})
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 4)
-          .map(([crop, tonnes]) => ({ crop, tonnes }))
-        const topLocations = Object.keys(data.locations || {}).slice(0, 3)
-        return { stageName, stageNum, action, total_tonnes: data.total_tonnes, total_farmers: data.total_farmers, topCrops, topLocations }
-      }).sort((a, b) => b.total_tonnes - a.total_tonnes)
-    : null
+  const mergedVolume = mergeStages(liveStageVolume)
+  const liveStages = Object.entries(mergedVolume)
+    .map(([name, d]) => ({
+      stageName: name,
+      stageNum: STAGE_NUMBER[name] || 10,
+      action: (STAGE_NUMBER[name] || 10) <= 9 ? 'contract_farming' : 'book_supply',
+      total_tonnes: d.total_tonnes || 0,
+      total_farmers: d.total_farmers || 0,
+      top_crops: d.top_crops || {},
+      locations: d.locations || {},
+    }))
+    .sort((a, b) => b.total_tonnes - a.total_tonnes)
+
+  const displayedStages = showAllStages ? liveStages : liveStages.slice(0, 8)
 
   if (activeStage !== null) {
-    const stage = STAGE_VOLUME.find(s => s.stage === activeStage)
-    return <DetailView stage={stage} onBack={() => setActiveStage(null)} />
+    return <DetailView stage={activeStage} onBack={() => setActiveStage(null)} />
   }
 
   return (
     <div className="mb-6">
       {/* Live data header */}
-      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+      <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-[#1D9E75] animate-pulse" />
-          <span className="text-[11px] font-medium text-gray-600">
-            Live harvest intelligence
-            {lastUpdated && (
-              <span className="text-gray-400 font-normal ml-1">
-                · {new Date(lastUpdated).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
-              </span>
-            )}
+          <span className="text-[11px] font-medium text-gray-700">
+            Live harvest intelligence · Tanzania · {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
           </span>
         </div>
-        <div className="flex gap-3 text-[10px] text-gray-400 flex-wrap">
-          <span>5,681 farmers tracked</span>
-          <span>·</span>
+        <div className="flex flex-wrap gap-x-4 text-[10px] text-gray-400">
+          <span>5,681 farmers</span>
           <span>28 regions</span>
-          <span>·</span>
           <span>83,855T predicted yield</span>
-          <span>·</span>
           <span>Updated every 6h</span>
         </div>
       </div>
 
-      {/* Stage legend */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-4">
         <div>
           <div className="text-sm font-medium text-gray-700">Forecasted volume by farming stage</div>
@@ -233,7 +303,6 @@ export default function FarmingStageIntel({ lastUpdated }) {
         </div>
       </div>
 
-      {/* Stage grid — live data if available, dummy fallback */}
       {stageLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {[...Array(6)].map((_, i) => (
@@ -244,85 +313,65 @@ export default function FarmingStageIntel({ lastUpdated }) {
             </div>
           ))}
         </div>
-      ) : stageCards ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {stageCards.map((s, i) => {
-            const accent = stageAccent(s.stageNum)
-            return (
-              <div
-                key={i}
-                onClick={() => setActiveStage(s.stageNum)}
-                className="bg-white rounded-2xl border border-gray-100 p-4 cursor-pointer hover:shadow-md hover:border-[#1D9E75] transition-all duration-150"
-                style={{ borderLeft: `3px solid ${accent}` }}
-              >
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <div className="text-[10px] text-gray-400">Stage {s.stageNum}</div>
-                    <div className="text-xs font-medium text-gray-800 mt-0.5">{s.stageName}</div>
+      ) : liveStages.length > 0 ? (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {displayedStages.map((s, i) => {
+              const accent = stageAccent(s.stageNum)
+              const topCropPills = Object.entries(s.top_crops)
+                .filter(([crop]) => crop.length <= 25)
+                .slice(0, 4)
+              const topLocs = Object.keys(s.locations).slice(0, 3)
+              return (
+                <div
+                  key={i}
+                  onClick={() => setActiveStage(s)}
+                  className="bg-white rounded-2xl border border-gray-100 p-4 cursor-pointer hover:shadow-md hover:border-[#1D9E75] transition-all duration-150"
+                  style={{ borderLeft: `3px solid ${accent}` }}
+                >
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <div className="text-[10px] text-gray-400">Stage {s.stageNum}</div>
+                      <div className="text-xs font-medium text-gray-800 mt-0.5">{s.stageName}</div>
+                    </div>
+                    <ActionBadge action={s.action} />
                   </div>
-                  <ActionBadge action={s.action} />
+                  <div className="text-2xl font-medium text-gray-900 leading-none">
+                    {fmtTonnes(s.total_tonnes)}
+                  </div>
+                  <div className="flex gap-1 flex-wrap mt-2">
+                    {topCropPills.map(([crop, tonnes], j) => (
+                      <span key={j} className="text-[9px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                        {CROP_EMOJI[crop] || CROP_EMOJI.default} {crop} {fmtTonnes(tonnes)}
+                      </span>
+                    ))}
+                  </div>
+                  {topLocs.length > 0 && (
+                    <div className="text-[9px] text-gray-400 mt-2 truncate">
+                      📍 {topLocs.join(', ')}
+                    </div>
+                  )}
+                  <div className="mt-3 pt-3 border-t border-gray-50 flex justify-between items-center">
+                    <span className="text-[10px] font-medium" style={{ color: '#0F6E56' }}>View breakdown →</span>
+                    <span className="text-[9px] text-gray-400">{s.total_farmers?.toLocaleString()} farmers</span>
+                  </div>
                 </div>
-                <div className="text-2xl font-medium text-gray-900 leading-none">
-                  {formatTonnes(s.total_tonnes)}
-                </div>
-                <div className="flex gap-1 flex-wrap mt-2">
-                  {s.topCrops.map((c, j) => (
-                    <span key={j} className="text-[9px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                      {CROP_EMOJI[c.crop] || CROP_EMOJI.default} {c.crop} {formatTonnes(c.tonnes)}
-                    </span>
-                  ))}
-                </div>
-                <div className="text-[9px] text-gray-400 mt-2 truncate">
-                  📍 {s.topLocations.join(', ')}
-                </div>
-                <div className="mt-3 pt-3 border-t border-gray-50 flex justify-between items-center">
-                  <span className="text-[10px] font-medium" style={{ color: '#0F6E56' }}>View breakdown →</span>
-                  <span className="text-[9px] text-gray-400">{s.total_farmers?.toLocaleString()} farmers</span>
-                </div>
-              </div>
-            )
-          })}
-        </div>
+              )
+            })}
+          </div>
+
+          {liveStages.length > 8 && (
+            <button
+              onClick={() => setShowAllStages(v => !v)}
+              className="text-[11px] text-[#0F6E56] font-medium flex items-center gap-1.5 mt-3 hover:underline"
+            >
+              {showAllStages ? '↑ Show fewer stages' : `↓ Show all ${liveStages.length} stages`}
+            </button>
+          )}
+        </>
       ) : (
-        /* Dummy fallback */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {STAGE_VOLUME.map(s => {
-            const totalTonnes = s.crops.reduce((sum, c) => sum + c.tonnes, 0)
-            const accent = stageAccent(s.stage)
-            const allRegions = s.crops[0].regions.join(', ')
-            const hasMoreCrops = s.crops.length > 1
-            return (
-              <div
-                key={s.stage}
-                onClick={() => setActiveStage(s.stage)}
-                className="bg-white rounded-2xl border border-gray-100 p-4 cursor-pointer hover:shadow-md hover:border-[#1D9E75] transition-all duration-150"
-                style={{ borderLeft: `3px solid ${accent}` }}
-              >
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <div className="text-[10px] text-gray-400">Stage {s.stage}</div>
-                    <div className="text-xs font-medium text-gray-800 mt-0.5">{s.name}</div>
-                  </div>
-                  <ActionBadge action={s.action} />
-                </div>
-                <div className="text-2xl font-medium text-gray-900 leading-none">{formatTonnes(totalTonnes)}</div>
-                <div className="flex gap-1 flex-wrap mt-2">
-                  {s.crops.map((c, i) => (
-                    <span key={i} className="text-[9px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                      {CROP_EMOJI[c.crop] || CROP_EMOJI.default} {c.crop} {c.tonnes.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}T
-                    </span>
-                  ))}
-                </div>
-                <div className="text-[9px] text-gray-400 mt-2 truncate">
-                  {allRegions}{hasMoreCrops ? '...' : ''}
-                </div>
-                <div className="mt-3 pt-3 border-t border-gray-50 flex justify-between items-center">
-                  <span className="text-[10px] font-medium" style={{ color: '#0F6E56' }}>View breakdown →</span>
-                  <span className="text-[9px] text-gray-400">~{Math.round(totalTonnes / 3.5).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')} farmers</span>
-                </div>
-              </div>
-            )
-          })}
+        <div className="py-12 text-center text-gray-400 text-[12px]">
+          Stage data loading — connect to live API
         </div>
       )}
     </div>

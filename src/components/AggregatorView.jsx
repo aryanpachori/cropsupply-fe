@@ -1,43 +1,21 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import KPIBar from './KPIBar'
 import FarmingStageIntel from './FarmingStageIntel'
 import CountdownCards from './CountdownCards'
 import SupplyTrend from './SupplyTrend'
 import ReadinessHeatmap from './ReadinessHeatmap'
-import PriceTrends from './PriceTrends'
-import DemandBoard from './DemandBoard'
 import RFQMatches from './RFQMatches'
-import AggregationNetwork from './AggregationNetwork'
-import ValueChainPlayers from './ValueChainPlayers'
-import GlobalTrends from './GlobalTrends'
-import WhatsAppIntel from './WhatsAppIntel'
-import WhatsAppSimulator from './WhatsAppSimulator'
 import FarmerTable from './FarmerTable'
-import AIMatchingPanel from './AIMatchingPanel'
-import TrendCharts from './TrendCharts'
-import InsightSummaryBar from './InsightSummaryBar'
 import CropDetailDrawer from './CropDetailDrawer'
-import TransportPanel from './TransportPanel'
-import SupplierDirectory from './SupplierDirectory'
-import DataQualityBanner from './DataQualityBanner'
+import EarlyAccessModal from './EarlyAccessModal'
 import { useCrop } from '@/context/CropContext'
 import { useHarvestData } from '@/hooks/useHarvestData'
-import EarlyAccessModal from './EarlyAccessModal'
-
-function SectionTitle({ children }) {
-  return <div className="text-[11px] uppercase text-gray-400 tracking-wide mt-6 mb-3 font-medium">{children}</div>
-}
-
-function Divider() {
-  return <div className="border-t border-gray-100 my-2" />
-}
 
 export default function AggregatorView({ regionFilter, cropFilter }) {
   const [showTop, setShowTop] = useState(false)
   const [showEarlyAccess, setShowEarlyAccess] = useState(false)
-  const trendChartsRef = useRef(null)
   const { activeCrop, setActiveCrop } = useCrop()
   const { kpis, forecast, heatmap, trends, rfqMatches, loading, error } = useHarvestData(regionFilter, cropFilter)
 
@@ -46,10 +24,6 @@ export default function AggregatorView({ regionFilter, cropFilter }) {
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
-
-  function handleInsightClick() {
-    trendChartsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
 
   if (loading) return (
     <div className="flex items-center justify-center py-24">
@@ -68,69 +42,36 @@ export default function AggregatorView({ regionFilter, cropFilter }) {
     </div>
   )
 
-  const liveKpis = kpis ? {
-    total_farmers: kpis.total_farmers,
-    expected_yield_tonnes: kpis.expected_yield_tonnes,
-    imminent_tonnes_14d: kpis.imminent_tonnes_14d,
-    regions_active: kpis.regions,
-    high_confidence_pct: kpis.high_confidence_pct,
-    soil_samples: kpis.soil_samples,
-    farmers_at_harvest: kpis.farmers_at_harvest_stage,
-    open_demand: kpis.open_demand_records,
-  } : null
-
-  const liveForecast = forecast || []
-  const liveHeatmap  = heatmap  || []
-  const liveTrends   = trends   || []
-  const liveRFQs     = rfqMatches || []
-
   return (
     <div>
-      <InsightSummaryBar onInsightClick={handleInsightClick} />
+      {/* 1 — Stage intel */}
       <FarmingStageIntel />
-      <KPIBar kpis={liveKpis} />
-      <Divider />
-      <CountdownCards forecast={liveForecast} />
 
-      <SectionTitle>AI analytics & charts</SectionTitle>
-      <div ref={trendChartsRef}>
-        <TrendCharts />
-      </div>
+      {/* 2 — KPI bar */}
+      <KPIBar kpis={kpis} />
 
-      <SectionTitle>Intelligence layers</SectionTitle>
-      <SupplyTrend trends={liveTrends} />
-      <ReadinessHeatmap heatmap={liveHeatmap} />
-      <PriceTrends />
+      <div className="border-t border-gray-100 my-3" />
 
-      <SectionTitle>Demand & matching</SectionTitle>
-      <DemandBoard />
-      <RFQMatches rfqs={liveRFQs} />
+      {/* 3 — Countdown cards */}
+      <CountdownCards forecast={forecast || []} />
 
-      <SectionTitle>Verified suppliers</SectionTitle>
-      <SupplierDirectory />
+      {/* 4 — Readiness heatmap */}
+      <ReadinessHeatmap heatmap={heatmap || []} />
 
-      <SectionTitle>Supply network</SectionTitle>
-      <AggregationNetwork />
+      {/* 5 — Supply trend */}
+      <SupplyTrend trends={trends || []} />
 
-      <SectionTitle>Logistics</SectionTitle>
-      <TransportPanel />
-
-      <SectionTitle>Intelligence for every player</SectionTitle>
-      <ValueChainPlayers />
-      <GlobalTrends />
-
-      <SectionTitle>WhatsApp & SMS channel</SectionTitle>
-      <WhatsAppSimulator />
-      <WhatsAppIntel />
-
-      <SectionTitle>Farmer-level data</SectionTitle>
+      {/* 6 — Farmer table */}
+      <div className="text-[11px] uppercase text-gray-400 tracking-wide mt-6 mb-3 font-medium">Farmer-level data</div>
       <FarmerTable regionFilter={regionFilter} cropFilter={cropFilter} />
 
-      <SectionTitle>Coming — Layer 3</SectionTitle>
-      <AIMatchingPanel />
+      {/* 7 — RFQ matches */}
+      <div className="text-[11px] uppercase text-gray-400 tracking-wide mt-6 mb-3 font-medium">Demand & matching</div>
+      <RFQMatches rfqs={rfqMatches || []} />
 
+      {/* 8 — Early access footer CTA */}
       <div className="mt-12 mb-6 rounded-2xl p-8 text-center" style={{ background: 'linear-gradient(135deg, #04342C 0%, #0F6E56 100%)' }}>
-        <div className="text-white/60 text-[10px] uppercase tracking-widest mb-2">Coming soon</div>
+        <div className="text-white/60 text-[10px] uppercase tracking-widest mb-2">Expanding</div>
         <div className="text-white text-lg font-medium mb-2">Full Harvest Intelligence Platform</div>
         <div className="text-white/70 text-[12px] mb-5 max-w-sm mx-auto">
           AI-driven procurement signals, contract farming windows, and regional supply forecasts — purpose-built for East African agri-buyers.
@@ -149,22 +90,19 @@ export default function AggregatorView({ regionFilter, cropFilter }) {
 
       <footer className="mt-4 mb-6 text-center space-y-1">
         <div className="text-[10px] text-gray-400">CropSupply Harvest Intelligence · Powered by MazaoHub</div>
-        <div className="text-[9px] text-gray-300">150K+ farmers · 205K soil samples · 14 regions · 156 markets · 37 countries</div>
-        <div className="text-[9px] text-gray-300">Data updates every 6h · Predictions: agronomic model + soil NPK + 19-step activity checklist</div>
+        <div className="text-[9px] text-gray-300">5,681 farmers · 28 regions · 83,855T predicted yield · Updates every 6h</div>
         <div className="text-[9px] text-gray-300 mt-2">Soil → Activity → Harvest → Aggregation point → Buyer. The full supply chain, intelligently connected.</div>
       </footer>
 
       {showTop && (
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="fixed bottom-7 right-20 w-9 h-9 rounded-full text-white flex items-center justify-center shadow-md transition-colors text-sm z-50 hover:opacity-90"
+          className="fixed bottom-7 right-6 w-9 h-9 rounded-full text-white flex items-center justify-center shadow-md text-sm z-50 hover:opacity-90"
           style={{ background: '#0F6E56' }}
         >
           ↑
         </button>
       )}
-
-      <DataQualityBanner />
 
       {activeCrop && (
         <CropDetailDrawer crop={activeCrop} onClose={() => setActiveCrop(null)} />

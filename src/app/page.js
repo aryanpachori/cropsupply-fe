@@ -15,9 +15,9 @@ import RFQMatches from '@/components/RFQMatches'
 import AggregationNetwork from '@/components/AggregationNetwork'
 import WhatsAppIntel from '@/components/WhatsAppIntel'
 import WhatsAppSimulator from '@/components/WhatsAppSimulator'
-import AIAnalyst from '@/components/AIAnalyst'
 import { CropProvider } from '@/context/CropContext'
 import { NavProvider, useNav } from '@/context/NavContext'
+import { useHarvestData } from '@/hooks/useHarvestData'
 
 function SectionTitle({ children }) {
   return <div className="text-[11px] uppercase text-gray-400 tracking-wide font-medium mb-4">{children}</div>
@@ -30,12 +30,13 @@ function AppContent() {
   const [cropFilter, setCropFilter]     = useState('')
 
   const showViewSwitcher = activeNav === 'harvest-intel'
+  const { rfqMatches } = useHarvestData()
 
   return (
     <>
       <main>
         <Navbar />
-        <div className="pt-[112px]">
+        <div className="pt-[78px]">
           {showViewSwitcher && (
             <ViewSwitcher
               activeView={activeView}
@@ -73,7 +74,7 @@ function AppContent() {
                 <SectionTitle>Active buyer RFQs</SectionTitle>
                 <DemandBoard />
                 <SectionTitle>Supply matches</SectionTitle>
-                <RFQMatches rfqs={[]} />
+                <RFQMatches rfqs={rfqMatches || []} />
                 <SectionTitle>WhatsApp & SMS pre-harvest</SectionTitle>
                 <WhatsAppSimulator />
                 <WhatsAppIntel />
@@ -91,7 +92,6 @@ function AppContent() {
           </div>
         </div>
       </main>
-      <AIAnalyst />
     </>
   )
 }

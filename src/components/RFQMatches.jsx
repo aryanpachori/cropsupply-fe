@@ -1,129 +1,118 @@
 'use client'
 
-import { useState } from 'react'
-import Badge from './ui/Badge'
-import { CROP_EMOJI } from '@/styles/tokens'
-import DealFlow from './DealFlow'
-
-function statusVariant(status) {
-  if (status === 'matched') return 'green'
-  if (status === 'partial') return 'amber'
-  return 'red'
-}
-
-function statusLabel(status) {
-  if (status === 'matched') return 'Matched'
-  if (status === 'partial') return 'Partial'
-  return 'No match'
-}
-
-function borderColor(status) {
-  if (status === 'matched') return '#1D9E75'
-  if (status === 'partial') return '#EDA100'
-  return '#E24B4A'
-}
-
-function matchTextColor(status) {
-  if (status === 'matched') return '#0F6E56'
-  if (status === 'partial') return '#854F0B'
-  return '#A32D2D'
-}
-
-function formatQty(qty) {
-  if (qty >= 1000000) return (qty / 1000).toFixed(0) + 'T'
-  if (qty >= 1000) return (qty / 1000).toFixed(0) + 'T'
-  return qty + 'kg'
-}
-
-function formatDate(d) {
-  const dt = new Date(d)
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-  return `${months[dt.getMonth()]} ${dt.getDate()}`
-}
+import { fmtTonnes } from '@/lib/utils'
 
 export default function RFQMatches({ rfqs }) {
-  const [deal, setDeal] = useState(null)
+  const all = rfqs || []
+  const matched   = all.filter(r => r.match_status === 'matched')
+  const available = all.filter(r => r.match_status === 'available')
+  const noMatch   = all.filter(r => r.match_status === 'no_match')
+
+  const future  = all.filter(r => r.demand_type === 'Future')
+  const current = all.filter(r => r.demand_type === 'Current')
+
+  const avgSupply  = all.length > 0 ? all.reduce((s, r) => s + (r.matched_tonnes || 0), 0) / all.length : 0
+  const maxSuppliers = all.length > 0 ? Math.max(...all.map(r => r.matched_supplier_count || 0)) : 0
 
   return (
     <div className="mb-6">
-      {deal && (
-        <DealFlow
-          type="buyer_to_supplier"
-          buyerData={deal.buyer}
-          supplierData={deal.supplier}
-          onClose={() => setDeal(null)}
-        />
-      )}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-[#185FA5] animate-pulse" />
-          <span className="text-[11px] font-medium text-gray-600">Matched RFQ alerts — your demand vs incoming supply</span>
+          <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#534AB7' }} />
+          <span className="text-[11px] font-medium text-gray-600">
+            Demand &amp; supply matching · {all.length} demand records
+          </span>
         </div>
-        <Badge variant="blue">{rfqs.length} open RFQs</Badge>
       </div>
 
-      <div className="flex flex-col gap-2">
-        {rfqs.map((rfq) => (
-          <div
-            key={rfq.rfq_id}
-            className="bg-white rounded-2xl overflow-hidden border flex flex-row transition-all duration-150 hover:shadow-sm"
-            style={{ borderColor: borderColor(rfq.match_status) }}
-          >
-            <div className="w-1 flex-shrink-0 self-stretch" style={{ background: borderColor(rfq.match_status) }} />
-            <div className="flex-1 p-4">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">{CROP_EMOJI[rfq.crop] || CROP_EMOJI.default}</span>
-                  <div>
-                    <div className="text-sm font-medium text-gray-900">{rfq.crop}</div>
-                    <div className="text-[10px] text-gray-400 mt-0.5">{rfq.region}</div>
-                  </div>
-                </div>
-                <Badge variant={statusVariant(rfq.match_status)}>{statusLabel(rfq.match_status)}</Badge>
-              </div>
+      {/* Summary strip */}
+      <div className="grid grid-cols-3 gap-3 mb-4">
+        <div className="rounded-2xl p-4 border" style={{ background: '#E1F5EE', borderColor: '#9FE1CB' }}>
+          <div className="text-[9px] uppercase tracking-wide font-medium mb-1" style={{ color: '#085041' }}>Matched</div>
+          <div className="text-2xl font-medium" style={{ color: '#0F6E56' }}>{matched.length}</div>
+          <div className="text-[10px] mt-0.5" style={{ color: '#085041' }}>demand records fully matched</div>
+        </div>
+        <div className="rounded-2xl p-4 border" style={{ background: '#E6F1FB', borderColor: '#B8D4F5' }}>
+          <div className="text-[9px] uppercase tracking-wide font-medium mb-1" style={{ color: '#185FA5' }}>Avg supply per RFQ</div>
+          <div className="text-2xl font-medium" style={{ color: '#185FA5' }}>{fmtTonnes(avgSupply)}</div>
+          <div className="text-[10px] mt-0.5" style={{ color: '#185FA5' }}>supply available in system</div>
+        </div>
+        <div className="rounded-2xl p-4 border" style={{ background: '#EEEDFE', borderColor: '#C4C0F5' }}>
+          <div className="text-[9px] uppercase tracking-wide font-medium mb-1" style={{ color: '#534AB7' }}>Active suppliers</div>
+          <div className="text-2xl font-medium" style={{ color: '#534AB7' }}>{maxSuppliers.toLocaleString()}</div>
+          <div className="text-[10px] mt-0.5" style={{ color: '#534AB7' }}>farmers at harvest stage 14+</div>
+        </div>
+      </div>
 
-              <div className="mt-2 flex flex-wrap gap-3 text-[10px] text-gray-500">
-                <span>📦 {formatQty(rfq.qty_kg)}</span>
-                <span>{rfq.currency}</span>
-                <span>Grade: {rfq.grade}</span>
-                <span>Needed by {formatDate(rfq.needed_by)}</span>
-              </div>
-
-              <div className="mt-2 text-[11px] leading-relaxed font-medium" style={{ color: matchTextColor(rfq.match_status) }}>
-                {rfq.match_text}
-              </div>
-
-              {rfq.match_status === 'matched' && (
-                <div className="mt-3 pt-3 border-t border-gray-50">
-                  <button
-                    onClick={() => setDeal({
-                      buyer: {
-                        name: rfq.region + ' Buyer',
-                        location: rfq.region,
-                        crop: rfq.crop,
-                        qty_tonnes: rfq.qty_kg >= 1000 ? rfq.qty_kg / 1000 : rfq.qty_kg,
-                        price_tzs: 500,
-                        grade: rfq.grade,
-                        frequency: 'one-time',
-                        needed_by: rfq.needed_by,
-                      },
-                      supplier: {
-                        name: 'Matched supplier',
-                        location: rfq.region,
-                        harvest_window: rfq.needed_by,
-                        confidence: 'high',
-                      },
-                    })}
-                    className="text-[11px] font-medium text-white px-4 py-2 rounded-xl transition-colors hover:opacity-90"
-                    style={{ background: '#0F6E56' }}
-                  >
-                    Connect with suppliers →
-                  </button>
-                </div>
-              )}
-            </div>
+      {/* Match status breakdown */}
+      <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-4">
+        <div className="text-[10px] uppercase text-gray-400 tracking-wide font-medium mb-3">Match status breakdown</div>
+        {[
+          { label: 'Matched',          count: matched.length,   color: '#1D9E75', note: 'Supply found and linked to demand' },
+          { label: 'Supply available', count: available.length, color: '#185FA5', note: 'Supply exists — crop specificity pending' },
+          { label: 'No match',         count: noMatch.length,   color: '#E24B4A', note: 'No supply at stage 14+ for this demand' },
+        ].map(item => (
+          <div key={item.label} className="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0">
+            <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: item.color }} />
+            <span className="text-[11px] font-medium text-gray-800 w-36 flex-shrink-0">{item.label}</span>
+            <span className="text-[11px] font-semibold w-8" style={{ color: item.color }}>{item.count}</span>
+            <span className="text-[10px] text-gray-400">{item.note}</span>
           </div>
         ))}
+      </div>
+
+      {/* Demand type split */}
+      <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-4">
+        <div className="text-[10px] uppercase text-gray-400 tracking-wide font-medium mb-3">Demand type split</div>
+        <div className="flex gap-6">
+          <div>
+            <div className="text-xl font-medium text-gray-900">{future.length}</div>
+            <div className="text-[10px] text-gray-500 mt-0.5">Future demand</div>
+          </div>
+          <div>
+            <div className="text-xl font-medium text-gray-900">{current.length}</div>
+            <div className="text-[10px] text-gray-500 mt-0.5">Current demand</div>
+          </div>
+        </div>
+        <div className="mt-3 h-1.5 rounded-full overflow-hidden" style={{ background: '#F1EFE8' }}>
+          <div
+            className="h-full rounded-full"
+            style={{ width: `${all.length > 0 ? (future.length / all.length * 100).toFixed(0) : 0}%`, background: '#185FA5' }}
+          />
+        </div>
+        <div className="flex justify-between text-[9px] text-gray-400 mt-1">
+          <span>Future ({all.length > 0 ? (future.length / all.length * 100).toFixed(0) : 0}%)</span>
+          <span>Current ({all.length > 0 ? (current.length / all.length * 100).toFixed(0) : 0}%)</span>
+        </div>
+      </div>
+
+      {/* The matched record — highlight it */}
+      {matched.length > 0 && (
+        <div className="rounded-2xl p-4 mb-3 border" style={{ background: '#E1F5EE', borderColor: '#1D9E75' }}>
+          <div className="text-[9px] uppercase tracking-wide font-medium mb-2" style={{ color: '#085041' }}>✓ Confirmed match</div>
+          {matched.map(r => (
+            <div key={r.id} className="flex items-start justify-between gap-3">
+              <div>
+                <div className="text-xs font-medium text-gray-800">Demand #{r.id} · {r.demand_type}</div>
+                <div className="text-[10px] text-gray-600 mt-0.5">{r.match_text}</div>
+              </div>
+              <div className="text-right flex-shrink-0">
+                <div className="text-xs font-medium" style={{ color: '#0F6E56' }}>{fmtTonnes(r.matched_tonnes)}</div>
+                <div className="text-[9px] text-gray-500">{r.matched_supplier_count} suppliers</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Data quality note */}
+      <div className="rounded-xl p-3 border" style={{ background: '#FAEEDA', borderColor: '#FAC775' }}>
+        <div className="text-[10px] font-medium mb-1" style={{ color: '#854F0B' }}>⚠ Matching accuracy improving</div>
+        <div className="text-[9px] leading-relaxed" style={{ color: '#854F0B' }}>
+          Most demand records have <code className="font-mono">crop_id=null</code> and <code className="font-mono">yield_estimate=null</code>.
+          Full crop-to-supply matching activates once the demand API links crop IDs.
+          Currently {available.length} records show available supply without crop specificity.
+        </div>
       </div>
     </div>
   )
